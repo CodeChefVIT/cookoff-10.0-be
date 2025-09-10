@@ -26,15 +26,90 @@ paths:
                 $ref: "#/components/schemas/SignupResponse"
         "400":
           description: Invalid request payload
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
         "406":
           description: Validation failed
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: User already exists
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal server error
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+  
+  /login:
+    post:
+      summary: User login
+      description: Authenticates a user with email and password, sets cookies for access and refresh tokens, and returns user data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+        "406":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Invalid password
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+
 
 components:
-  schemas:  
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "failed"
+        error:
+          type: string
+          description: Error Message
+    
     SignupRequest:
       type: object
       required:
@@ -53,6 +128,9 @@ components:
     SignupResponse:
       type: object
       properties:
+        status:
+          type: string
+          example: "success"
         message:
           type: string
           example: user added
@@ -64,3 +142,41 @@ components:
           type: string
           description: Generated plain password
           example: test123
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Login successful"
+        data:
+          type: object
+          properties:
+            username:
+              type: string
+              description: User's display name
+              example: Chef
+            round:
+              type: integer
+              description: Round qualified (0 or 1)
+              example: 1
+            score:
+              type: string
+              description: User score (numeric type from Postgres)
+              example: 100
