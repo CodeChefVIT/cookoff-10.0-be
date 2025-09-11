@@ -101,6 +101,46 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
+const getUsersWithCursor = `-- name: GetUsersWithCursor :many
+SELECT id, email, reg_no, password, role, round_qualified, score, name, is_banned
+FROM users
+WHERE ($1::uuid IS NULL OR id > $1)
+ORDER BY id ASC
+LIMIT $2
+`
+
+func (q *Queries) GetUsersWithCursor(ctx context.Context, cursor *uuid.UUID, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsersWithCursor, cursor, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.RegNo,
+			&i.Password,
+			&i.Role,
+			&i.RoundQualified,
+			&i.Score,
+			&i.Name,
+			&i.IsBanned,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLeaderboard = `-- name: GetLeaderboard :many
 SELECT id, name, score
 FROM users
