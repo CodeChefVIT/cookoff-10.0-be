@@ -6,7 +6,7 @@ import (
     "net/http"
 
     "github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
-    "github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
+    //"github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
     "github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
     "github.com/google/uuid"
     "github.com/labstack/echo/v4"
@@ -45,7 +45,7 @@ func SubmitCode(c echo.Context) error {
         testcases = append(testcases, map[string]string{"input": tc.Input})
     }
 
-    tokens, err := workers.CreateBatchSubmission(submissionID.String(), req.SourceCode, req.LanguageID, testcases)
+    tokens, err := utils.CreateBatchSubmission(submissionID.String(), req.SourceCode, req.LanguageID, testcases)
     if err != nil {
         fmt.Println("CreateBatchSubmission error:", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create batch submission"})
