@@ -1,16 +1,15 @@
 package submissions
 
 import (
-	//"context"
-	"fmt"
-	//"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
-	"github.com/google/uuid"
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/google/uuid"
 )
 
 type SubmissionInput struct {
@@ -22,18 +21,28 @@ type SubmissionInput struct {
 }
 
 type Judge0Submission struct {
-	LanguageID int    `json:"language_id"`
-	SourceCode string `json:"source_code"`
-	Stdin      string `json:"stdin,omitempty"`
+	LanguageID     int    `json:"language_id"`
+	SourceCode     string `json:"source_code"`
+	Stdin          string `json:"stdin,omitempty"`
+	ExpectedOutput string `json:"expected_output,omitempty"`
+	Callback       string `json:"callback_url,omitempty"`
 }
 
 func CreateBatchSubmission(submissionID, sourceCode string, languageID int, testcases []map[string]string) ([]string, error) {
 	var submissions []Judge0Submission
+
+	callbackURL := os.Getenv("CALLBACK_URL")
+	if callbackURL == "" {
+		return nil, errors.New("CALLBACK_URL not set in environment")
+	}
+
 	for _, tc := range testcases {
 		submissions = append(submissions, Judge0Submission{
-			LanguageID: languageID,
-			SourceCode: sourceCode,
-			Stdin:      tc["input"],
+			LanguageID:     languageID,
+			SourceCode:     sourceCode,
+			Stdin:          tc["input"],
+			ExpectedOutput: tc["output"],
+			Callback:       callbackURL,
 		})
 	}
 
@@ -47,6 +56,10 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 		return nil, fmt.Errorf("failed to marshal submissions: %v", err)
 	}
 
+	// 👇 Debug print the exact JSON body being sent
+	fmt.Println("Payload being sent to Judge0:")
+	fmt.Println(string(data))
+
 	judge0URI := os.Getenv("JUDGE0_URI")
 	if judge0URI == "" {
 		return nil, errors.New("JUDGE0_URI not set in environment")
@@ -56,7 +69,7 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 	// 	return nil, errors.New("JUDGE0_API_KEY not set in environment")
 	// }
 
-	req, err := http.NewRequest("POST", judge0URI, bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", judge0URI+"/submissions/batch", bytes.NewBuffer(data))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}

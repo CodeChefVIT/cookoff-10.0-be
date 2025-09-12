@@ -43,7 +43,10 @@ func SubmitCode(c echo.Context) error {
 
     var testcases []map[string]string
     for _, tc := range testcasesRows {
-        testcases = append(testcases, map[string]string{"input": tc.Input})
+        testcases = append(testcases, map[string]string{
+            "input":  tc.Input,
+            "output": tc.ExpectedOutput, 
+        })
     }
 
     tokens, err := submissions.CreateBatchSubmission(submissionID.String(), req.SourceCode, req.LanguageID, testcases)

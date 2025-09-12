@@ -12,4 +12,6 @@ func RegisterRoute(e *echo.Echo) {
 	e.POST("/signup", controllers.Signup)
 	e.POST(("/jakabutarja"), controllers.SubmitCode)
 	e.POST("/login", controllers.Login)
+	e.PUT("/callback", controllers.CallbackUrl)
+
 }
