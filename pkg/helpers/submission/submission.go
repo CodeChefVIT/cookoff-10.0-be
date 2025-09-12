@@ -56,9 +56,6 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 		return nil, fmt.Errorf("failed to marshal submissions: %v", err)
 	}
 
-	// 👇 Debug print the exact JSON body being sent
-	fmt.Println("Payload being sent to Judge0:")
-	fmt.Println(string(data))
 
 	judge0URI := os.Getenv("JUDGE0_URI")
 	if judge0URI == "" {
