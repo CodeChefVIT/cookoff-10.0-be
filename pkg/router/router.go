@@ -13,5 +13,13 @@ func RegisterRoute(e *echo.Echo) {
 	e.POST(("/jakabutarja"), controllers.SubmitCode)
 	e.POST("/login", controllers.Login)
 	e.PUT("/callback", controllers.CallbackUrl)
+	e.POST("/logout", controllers.Logout)
+	e.POST("/question", controllers.CreateQuestion)
+	e.GET("/question", controllers.GetQuestion)
+	e.GET("/question/:id", controllers.GetAllQuestions)
+	e.PUT("/question/:id", controllers.UpdateQuestion)
+	e.DELETE("/question/:id", controllers.DeleteQuestion)
+	e.POST("/question/:id/bounty/activate", controllers.ActivateBounty)
+  e.POST("/question/:id/bounty/deactivate", controllers.DeactivateBounty)
 
 }
