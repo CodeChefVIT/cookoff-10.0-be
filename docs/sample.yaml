@@ -96,6 +96,169 @@ paths:
             application/json:
               schema:
                $ref: "#/components/schemas/ErrorResponse"
+  /questions:
+    post:
+      summary: Create a new question
+      tags:
+        - Questions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        '201':
+          description: Question created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/Question'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+    get:
+      summary: Get all questions
+      tags:
+        - Questions
+      responses:
+        '200':
+          description: List of all questions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  questions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Question'
+        '500':
+          description: Internal server error
+
+  /questions/{id}:
+    get:
+      summary: Get a question by ID
+      tags:
+        - Questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  question:
+                    $ref: '#/components/schemas/Question'
+        '400':
+          description: Invalid UUID
+        '404':
+          description: Question not found
+
+    put:
+      summary: Update a question by ID
+      tags:
+        - Questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        '200':
+          description: Question updated successfully
+        '400':
+          description: Invalid UUID or bad request
+        '500':
+          description: Internal server error
+
+    delete:
+      summary: Delete a question by ID
+      tags:
+        - Questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Question deleted successfully
+        '400':
+          description: Invalid UUID
+        '500':
+          description: Internal server error
+
+  /questions/{id}/bounty/activate:
+    put:
+      summary: Activate bounty for a question
+      tags:
+        - Questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bounty activated successfully
+        '400':
+          description: Invalid UUID
+        '500':
+          description: Internal server error
+
+  /questions/{id}/bounty/deactivate:
+    put:
+      summary: Deactivate bounty for a question
+      tags:
+        - Questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bounty deactivated successfully
+        '400':
+          description: Invalid UUID
+        '500':
+          description: Internal server error
 
 
 components:
@@ -180,3 +343,155 @@ components:
               type: string
               description: User score (numeric type from Postgres)
               example: 100
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        title:
+          type: string
+        qType:
+          type: string
+        isBountyActive:
+          type: boolean
+        inputFormat:
+          type: array
+          items: { type: string }
+        points:
+          type: integer
+        round:
+          type: integer
+        constraints:
+          type: array
+          items: { type: string }
+        outputFormat:
+          type: array
+          items: { type: string }
+        sampleTestInput:
+          type: array
+          items: { type: string }
+        sampleTestOutput:
+          type: array
+          items: { type: string }
+        explanation:
+          type: array
+          items: { type: string }
+      required:
+        - id
+        - description
+        - title
+        - qType
+        - isBountyActive
+        - inputFormat
+        - points
+        - round
+        - constraints
+        - outputFormat
+        - sampleTestInput
+        - sampleTestOutput
+        - explanation
+
+    CreateQuestionParams:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        title:
+          type: string
+        qType:
+          type: string
+        isBountyActive:
+          type: boolean
+        inputFormat:
+          type: array
+          items: { type: string }
+        points:
+          type: integer
+        round:
+          type: integer
+        constraints:
+          type: array
+          items: { type: string }
+        outputFormat:
+          type: array
+          items: { type: string }
+        sampleTestInput:
+          type: array
+          items: { type: string }
+        sampleTestOutput:
+          type: array
+          items: { type: string }
+        explanation:
+          type: array
+          items: { type: string }
+      required:
+        - id
+        - description
+        - title
+        - qType
+        - isBountyActive
+        - inputFormat
+        - points
+        - round
+        - constraints
+        - outputFormat
+        - sampleTestInput
+        - sampleTestOutput
+        - explanation
+
+    UpdateQuestionParams:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        title:
+          type: string
+        qType:
+          type: string
+        isBountyActive:
+          type: boolean
+        inputFormat:
+          type: array
+          items: { type: string }
+        points:
+          type: integer
+        round:
+          type: integer
+        constraints:
+          type: array
+          items: { type: string }
+        outputFormat:
+          type: array
+          items: { type: string }
+        sampleTestInput:
+          type: array
+          items: { type: string }
+        sampleTestOutput:
+          type: array
+          items: { type: string }
+        explanation:
+          type: array
+          items: { type: string }
+      required:
+        - id
+        - description
+        - title
+        - qType
+        - isBountyActive
+        - inputFormat
+        - points
+        - round
+        - constraints
+        - outputFormat
+        - sampleTestInput
+        - sampleTestOutput
+        - explanation

@@ -45,7 +45,6 @@ func Signup(c echo.Context) error {
 		return c.JSON(http.StatusConflict, echo.Map{
 			"status": "failed",
 			"error": "User already exists",
-			"key": utils.Config.JwtSecret,
 		})
 	}
 	
