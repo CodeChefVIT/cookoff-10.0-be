@@ -13,6 +13,7 @@ func RegisterRoute(e *echo.Echo) {
 	e.POST(("/jakabutarja"), controllers.SubmitCode)
 	e.POST("/login", controllers.Login)
 	e.POST("/logout", controllers.Logout)
+	e.POST("/refreshToken", controllers.RefreshToken)
 
 	e.POST("/question", controllers.CreateQuestion)
 	e.GET("/question", controllers.GetQuestion)
