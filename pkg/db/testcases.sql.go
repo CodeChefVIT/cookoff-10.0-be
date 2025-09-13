@@ -9,10 +9,69 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getTestcases = `-- name: GetTestcases :many
-SELECT
+const createTestCase = `-- name: CreateTestCase :one
+INSERT INTO testcases (
+    id,
+    expected_output,
+    memory,
+    input,
+    hidden,
+    runtime,
+    question_id
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7
+)
+RETURNING id, expected_output, memory, input, hidden, runtime, question_id
+`
+
+type CreateTestCaseParams struct {
+	ID             uuid.UUID
+	ExpectedOutput string
+	Memory         pgtype.Numeric
+	Input          string
+	Hidden         bool
+	Runtime        pgtype.Numeric
+	QuestionID     uuid.UUID
+}
+
+func (q *Queries) CreateTestCase(ctx context.Context, arg CreateTestCaseParams) (Testcase, error) {
+	row := q.db.QueryRow(ctx, createTestCase,
+		arg.ID,
+		arg.ExpectedOutput,
+		arg.Memory,
+		arg.Input,
+		arg.Hidden,
+		arg.Runtime,
+		arg.QuestionID,
+	)
+	var i Testcase
+	err := row.Scan(
+		&i.ID,
+		&i.ExpectedOutput,
+		&i.Memory,
+		&i.Input,
+		&i.Hidden,
+		&i.Runtime,
+		&i.QuestionID,
+	)
+	return i, err
+}
+
+const deleteTestCase = `-- name: DeleteTestCase :exec
+DELETE FROM testcases
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTestCase(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteTestCase, id)
+	return err
+}
+
+const getAllTestCases = `-- name: GetAllTestCases :many
+SELECT 
     id,
     expected_output,
     memory,
@@ -21,11 +80,10 @@ SELECT
     runtime,
     question_id
 FROM testcases
-WHERE question_id = $1
 `
 
-func (q *Queries) GetTestcases(ctx context.Context, questionID uuid.UUID) ([]Testcase, error) {
-	rows, err := q.db.Query(ctx, getTestcases, questionID)
+func (q *Queries) GetAllTestCases(ctx context.Context) ([]Testcase, error) {
+	rows, err := q.db.Query(ctx, getAllTestCases)
 	if err != nil {
 		return nil, err
 	}
@@ -50,4 +108,161 @@ func (q *Queries) GetTestcases(ctx context.Context, questionID uuid.UUID) ([]Tes
 		return nil, err
 	}
 	return items, nil
+}
+
+const getPublicTestCasesByQuestion = `-- name: GetPublicTestCasesByQuestion :many
+SELECT 
+    id,
+    expected_output,
+    memory,
+    input,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE question_id = $1 
+AND hidden = false
+`
+
+func (q *Queries) GetPublicTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]Testcase, error) {
+	rows, err := q.db.Query(ctx, getPublicTestCasesByQuestion, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Testcase
+	for rows.Next() {
+		var i Testcase
+		if err := rows.Scan(
+			&i.ID,
+			&i.ExpectedOutput,
+			&i.Memory,
+			&i.Input,
+			&i.Hidden,
+			&i.Runtime,
+			&i.QuestionID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTestCase = `-- name: GetTestCase :one
+SELECT 
+    id,
+    expected_output,
+    memory,
+    input,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE id = $1
+`
+
+func (q *Queries) GetTestCase(ctx context.Context, id uuid.UUID) (Testcase, error) {
+	row := q.db.QueryRow(ctx, getTestCase, id)
+	var i Testcase
+	err := row.Scan(
+		&i.ID,
+		&i.ExpectedOutput,
+		&i.Memory,
+		&i.Input,
+		&i.Hidden,
+		&i.Runtime,
+		&i.QuestionID,
+	)
+	return i, err
+}
+
+const getTestCasesByQuestion = `-- name: GetTestCasesByQuestion :many
+SELECT 
+    id,
+    expected_output,
+    memory,
+    input,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE question_id = $1
+`
+
+func (q *Queries) GetTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]Testcase, error) {
+	rows, err := q.db.Query(ctx, getTestCasesByQuestion, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Testcase
+	for rows.Next() {
+		var i Testcase
+		if err := rows.Scan(
+			&i.ID,
+			&i.ExpectedOutput,
+			&i.Memory,
+			&i.Input,
+			&i.Hidden,
+			&i.Runtime,
+			&i.QuestionID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateTestCase = `-- name: UpdateTestCase :one
+UPDATE testcases
+SET 
+    expected_output = $2,
+    memory = $3,
+    input = $4,
+    hidden = $5,
+    runtime = $6,
+    question_id = $7
+WHERE id = $1
+RETURNING id, expected_output, memory, input, hidden, runtime, question_id
+`
+
+type UpdateTestCaseParams struct {
+	ID             uuid.UUID
+	ExpectedOutput string
+	Memory         pgtype.Numeric
+	Input          string
+	Hidden         bool
+	Runtime        pgtype.Numeric
+	QuestionID     uuid.UUID
+}
+
+func (q *Queries) UpdateTestCase(ctx context.Context, arg UpdateTestCaseParams) (Testcase, error) {
+	row := q.db.QueryRow(ctx, updateTestCase,
+		arg.ID,
+		arg.ExpectedOutput,
+		arg.Memory,
+		arg.Input,
+		arg.Hidden,
+		arg.Runtime,
+		arg.QuestionID,
+	)
+	var i Testcase
+	err := row.Scan(
+		&i.ID,
+		&i.ExpectedOutput,
+		&i.Memory,
+		&i.Input,
+		&i.Hidden,
+		&i.Runtime,
+		&i.QuestionID,
+	)
+	return i, err
 }
