@@ -10,6 +10,8 @@ paths:
   /signup:
     post:
       summary: User signup
+      tags:
+        - Auth
       description: Creates a user and sends a generated password through mail
       requestBody:
         required: true
@@ -52,6 +54,8 @@ paths:
   /login:
     post:
       summary: User login
+      tags:
+        - Auth
       description: Authenticates a user with email and password, sets cookies for access and refresh tokens, and returns user data.
       requestBody:
         required: true
@@ -96,6 +100,53 @@ paths:
             application/json:
               schema:
                $ref: "#/components/schemas/ErrorResponse"
+  
+  /logout:
+    post:
+      summary: User logout
+      tags:
+        - Auth
+      description: Logs a user out, deletes cookies and removes refresh token from redis.
+      responses:
+        "200":
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponse"
+        "400":
+          description: Cookie Error
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+
+  /refreshToken:
+    post:
+      summary: Refresh access and refresh tokens
+      tags:
+        - Auth
+      description: Validates recieved refresh token and issues new access and refresh tokens
+      responses:
+        "200":
+          description: Token refresh successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenRefreshResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+               $ref: "#/components/schemas/ErrorResponse"
+
   /questions:
     post:
       summary: Create a new question
@@ -495,3 +546,23 @@ components:
         - sampleTestInput
         - sampleTestOutput
         - explanation
+
+    LogoutResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "logged out successfully"
+
+    TokenRefreshResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "tokens refreshed"

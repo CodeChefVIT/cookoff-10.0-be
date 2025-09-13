@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -11,15 +15,31 @@ func Logout(c echo.Context) error {
 	access, err := c.Cookie("access_token")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"error": "access token not found",
+			"status": "failed",
+			"error":  "access token not found",
 		})
 	}
 
 	refresh, err := c.Cookie("refresh_token")
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
-			"error": "refresh token not found",
+			"status": "failed",
+			"error":  "refresh token not found",
 		})
+	}
+
+	if refresh != nil {
+		refreshToken := refresh.Value
+		claims := &auth.RefreshTokenClaims{}
+		token, _ := jwt.ParseWithClaims(refreshToken, claims, func(t *jwt.Token) (interface{}, error) {
+			return utils.Config.JwtSecret, nil
+		})
+		if token != nil && token.Valid {
+			err := utils.RedisClient.Del(c.Request().Context(), claims.UserID).Err()
+			if err != nil {
+				logger.Errorf("Redis token del err: %v", err.Error())
+			}
+		}
 	}
 
 	if access != nil {
@@ -45,6 +65,7 @@ func Logout(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
+		"status":  "success",
 		"message": "logged out successfully",
 	})
 }

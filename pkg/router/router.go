@@ -14,6 +14,8 @@ func RegisterRoute(e *echo.Echo) {
 	e.POST("/login", controllers.Login)
 	e.PUT("/callback", controllers.CallbackUrl)
 	e.POST("/logout", controllers.Logout)
+	e.POST("/refreshToken", controllers.RefreshToken)
+  
 	e.POST("/question", controllers.CreateQuestion)
 	e.GET("/question", controllers.GetQuestion)
 	e.GET("/question/:id", controllers.GetAllQuestions)
