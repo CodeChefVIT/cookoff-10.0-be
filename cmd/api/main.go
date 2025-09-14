@@ -1,39 +1,62 @@
 package main
 
 import (
-    "fmt"
-    logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-    "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
-    "github.com/CodeChefVIT/cookoff-10.0-be/pkg/router"
-    "github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
-    "github.com/CodeChefVIT/cookoff-10.0-be/pkg/controllers"
-    "github.com/labstack/echo/v4"
-    "github.com/labstack/echo/v4/middleware"
+	"fmt"
+	"os"
+
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/controllers"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
+	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/router"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
+	"github.com/hibiken/asynq"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-    logger.InitLogger()
-    utils.LoadConfig()
-    utils.InitCache()
-    utils.InitDB()
-    validator.InitValidator()
+	logger.InitLogger()
+	utils.LoadConfig()
+	utils.InitCache()
+	utils.InitDB()
+	validator.InitValidator()
 
-    
-    controllers.Queries = utils.Queries
+	controllers.Queries = utils.Queries
 
-    e := echo.New()
-    e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-        LogURI:        true,
-        LogStatus:     true,
-        LogError:      true,
-        LogValuesFunc: logger.RouteLogger,
-    }))
+	// Initialize queue system
+	redisURI := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), "6379")
+	if redisURI == ":" {
+		redisURI = "localhost:6379" // Default fallback
+	}
 
-    router.RegisterRoute(e)
+	taskServer, _ := queue.InitQueue(redisURI, 2)
 
-    for _, r := range e.Routes() {
-        fmt.Println(r.Method, r.Path)
-    }
+	// Start the queue worker in a goroutine
+	go func() {
+		mux := asynq.NewServeMux()
+		// Register the worker function for Judge0 callback processing
+		mux.HandleFunc(queue.TypeJudge0Callback, workers.ProcessJudge0CallbackTask)
 
-    e.Start(":" + utils.Config.Port)
+		// Start the queue server
+		queue.StartQueueServer(taskServer, mux)
+	}()
+
+	e := echo.New()
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:        true,
+		LogStatus:     true,
+		LogError:      true,
+		LogValuesFunc: logger.RouteLogger,
+	}))
+
+	router.RegisterRoute(e)
+
+	for _, r := range e.Routes() {
+		fmt.Println(r.Method, r.Path)
+	}
+
+	logger.Infof("Starting HTTP server on port %s", utils.Config.Port)
+	e.Start(":" + utils.Config.Port)
 }
