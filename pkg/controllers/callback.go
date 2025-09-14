@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
 	"github.com/hibiken/asynq"
 	"github.com/labstack/echo/v4"
@@ -22,7 +23,7 @@ func CallbackUrl(c echo.Context) error {
 	fmt.Printf("Judge0 Callback JSON: %s\n", string(body))
 
 	// Parse the Judge0 callback payload
-	var callbackPayload queue.Judge0CallbackPayload
+	var callbackPayload dto.Judge0CallbackPayload
 	if err := json.Unmarshal(body, &callbackPayload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": fmt.Errorf("failed to parse Judge0 callback payload: %w", err).Error(),
