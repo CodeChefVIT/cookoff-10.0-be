@@ -4,32 +4,15 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
-type CreateTestCaseRequest struct {
-	ExpectedOutput string      `json:"expected_output" validate:"required"`
-	Memory         interface{} `json:"memory" validate:"required"`
-	Input          string      `json:"input" validate:"required"`
-	Hidden         bool        `json:"hidden"`
-	Runtime        interface{} `json:"runtime" validate:"required"`
-	QuestionID     string      `json:"question_id" validate:"required,uuid"`
-}
-
-type UpdateTestCaseRequest struct {
-	ExpectedOutput string      `json:"expected_output"`
-	Memory         interface{} `json:"memory"`
-	Input          string      `json:"input"`
-	Hidden         *bool       `json:"hidden"`
-	Runtime        interface{} `json:"runtime"`
-	QuestionID     string      `json:"question_id" validate:"omitempty,uuid"`
-}
-
 func CreateTestCase(c echo.Context) error {
-	var req CreateTestCaseRequest
+	var req dto.CreateTestCaseRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"status": "Invalid request body",
@@ -125,7 +108,7 @@ func UpdateTestCase(c echo.Context) error {
 		})
 	}
 
-	var req UpdateTestCaseRequest
+	var req dto.UpdateTestCaseRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"status": "Invalid request body",
