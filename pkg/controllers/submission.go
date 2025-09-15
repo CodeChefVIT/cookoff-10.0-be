@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	submissions "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 
@@ -16,15 +17,8 @@ import (
 
 var Queries *db.Queries
 
-type SubmissionRequest struct {
-	SourceCode string `json:"source_code" validate:"required"`
-	LanguageID int    `json:"language_id" validate:"required"`
-	QuestionID string `json:"question_id" validate:"required"`
-	UserID     string `json:"user_id"`
-}
-
 func SubmitCode(c echo.Context) error {
-	var req SubmissionRequest
+	var req dto.SubmissionRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
