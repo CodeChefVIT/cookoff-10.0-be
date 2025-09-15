@@ -9,22 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Question struct {
-	ID               uuid.UUID `json:"id"`
-	Description      string    `json:"description"`
-	Title            string    `json:"title"`
-	Qtype            string    `json:"qType"`
-	Isbountyactive   bool      `json:"isBountyActive"`
-	InputFormat      []string  `json:"inputFormat"`
-	Points           int32     `json:"points"`
-	Round            int32     `json:"round"`
-	Constraints      []string  `json:"constraints"`
-	OutputFormat     []string  `json:"outputFormat"`
-	SampleTestInput  []string  `json:"sampleTestInput"`
-	SampleTestOutput []string  `json:"sampleTestOutput"`
-	Explanation      []string  `json:"explanation"`
-}
-
 func CreateQuestion(c echo.Context) error {
 	var req db.CreateQuestionParams
 	err := c.Bind(&req)
