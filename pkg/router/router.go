@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/controllers"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/middlewares"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,11 +34,13 @@ func RegisterRoute(e *echo.Echo) {
 	e.PUT("/testcase/:id", controllers.UpdateTestCase)
 	e.DELETE("/testcase/:id", controllers.DeleteTestCase)
 	e.GET("/testcases", controllers.GetAllTestCases)
-	e.GET("/users", controllers.GetAllUsers)
-	e.POST("/users/:id/ban", controllers.BanUser)
-	e.POST("/users/:id/unban", controllers.UnbanUser)
-	e.GET("/leaderboard", controllers.GetLeaderboard)
-	e.POST("/users/:id/upgrade", controllers.UpgradeUserToRound)
-	e.GET("/users/:id/submissions", controllers.GetSubmissionByUser)
+
+	// Admin Routes
+	e.GET("/users", controllers.GetAllUsers, middlewares.AdminOnly)
+	e.POST("/users/:id/ban", controllers.BanUser, middlewares.AdminOnly)
+	e.POST("/users/:id/unban", controllers.UnbanUser, middlewares.AdminOnly)
+	e.GET("/leaderboard", controllers.GetLeaderboard, middlewares.AdminOnly)
+	e.POST("/users/:id/upgrade", controllers.UpgradeUserToRound, middlewares.AdminOnly)
+	e.GET("/users/:id/submissions", controllers.GetSubmissionByUser, middlewares.AdminOnly)
 
 }
