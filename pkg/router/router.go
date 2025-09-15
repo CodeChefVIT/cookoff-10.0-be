@@ -17,8 +17,8 @@ func RegisterRoute(e *echo.Echo) {
 	e.POST("/callback", controllers.CallbackUrl)
 
 	e.POST("/question", controllers.CreateQuestion)
-	e.GET("/question", controllers.GetQuestion)
-	e.GET("/question/:id", controllers.GetAllQuestions)
+	e.GET("/question", controllers.GetAllQuestions)
+	e.GET("/question/:id", controllers.GetQuestion)
 	e.PUT("/question/:id", controllers.UpdateQuestion)
 	e.DELETE("/question/:id", controllers.DeleteQuestion)
 	e.POST("/question/:id/bounty/activate", controllers.ActivateBounty)
