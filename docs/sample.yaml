@@ -31,26 +31,26 @@ paths:
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "406":
           description: Validation failed
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: User already exists
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal server error
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
-  
+                $ref: "#/components/schemas/ErrorResponse"
+
   /login:
     post:
       summary: User login
@@ -75,32 +75,32 @@ paths:
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "406":
           description: Validation failed
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "404":
           description: User not found
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           description: Invalid password
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal server error
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
-  
+                $ref: "#/components/schemas/ErrorResponse"
+
   /logout:
     post:
       summary: User logout
@@ -119,7 +119,7 @@ paths:
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
 
   /refreshToken:
     post:
@@ -139,13 +139,13 @@ paths:
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal server error
           content:
             application/json:
               schema:
-               $ref: "#/components/schemas/ErrorResponse"
+                $ref: "#/components/schemas/ErrorResponse"
 
   /questions:
     post:
@@ -157,9 +157,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Question'
+              $ref: "#/components/schemas/Question"
       responses:
-        '201':
+        "201":
           description: Question created successfully
           content:
             application/json:
@@ -171,10 +171,10 @@ paths:
                   message:
                     type: string
                   data:
-                    $ref: '#/components/schemas/Question'
-        '400':
+                    $ref: "#/components/schemas/Question"
+        "400":
           description: Bad request
-        '500':
+        "500":
           description: Internal server error
 
     get:
@@ -182,7 +182,7 @@ paths:
       tags:
         - Questions
       responses:
-        '200':
+        "200":
           description: List of all questions
           content:
             application/json:
@@ -194,8 +194,8 @@ paths:
                   questions:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Question'
-        '500':
+                      $ref: "#/components/schemas/Question"
+        "500":
           description: Internal server error
 
   /questions/{id}:
@@ -211,7 +211,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Question found
           content:
             application/json:
@@ -221,10 +221,10 @@ paths:
                   status:
                     type: string
                   question:
-                    $ref: '#/components/schemas/Question'
-        '400':
+                    $ref: "#/components/schemas/Question"
+        "400":
           description: Invalid UUID
-        '404':
+        "404":
           description: Question not found
 
     put:
@@ -243,13 +243,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Question'
+              $ref: "#/components/schemas/Question"
       responses:
-        '200':
+        "200":
           description: Question updated successfully
-        '400':
+        "400":
           description: Invalid UUID or bad request
-        '500':
+        "500":
           description: Internal server error
 
     delete:
@@ -264,11 +264,11 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Question deleted successfully
-        '400':
+        "400":
           description: Invalid UUID
-        '500':
+        "500":
           description: Internal server error
 
   /questions/{id}/bounty/activate:
@@ -284,11 +284,11 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Bounty activated successfully
-        '400':
+        "400":
           description: Invalid UUID
-        '500':
+        "500":
           description: Internal server error
 
   /questions/{id}/bounty/deactivate:
@@ -304,13 +304,12 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Bounty deactivated successfully
-        '400':
+        "400":
           description: Invalid UUID
-        '500':
+        "500":
           description: Internal server error
-
 
 components:
   schemas:
@@ -323,7 +322,7 @@ components:
         error:
           type: string
           description: Error Message
-    
+
     SignupRequest:
       type: object
       required:
