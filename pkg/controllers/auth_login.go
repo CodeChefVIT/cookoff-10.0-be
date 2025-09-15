@@ -1,42 +1,36 @@
 package controllers
 
-
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
-	"fmt"
 
-
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
-	"github.com/labstack/echo/v4"
 	"github.com/jackc/pgx/v5"
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LoginRequest struct {
-	Email    string `json:"email"    validate:"required,email"`
-	Password string `json:"password" validate:"required"`
-}
-
 func Login(c echo.Context) error {
-	var req LoginRequest
+	var req dto.LoginRequest
 
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"status": "failed",
-			"error": "invalid request",
+			"error":  "invalid request",
 		})
 	}
 
 	if err := validator.ValidatePayload(req); err != nil {
 		return c.JSON(http.StatusNotAcceptable, echo.Map{
 			"status": "failed",
-			"error": "invalid input",
-	})
+			"error":  "invalid input",
+		})
 	}
 
 	user, err := utils.Queries.GetUserByEmail(c.Request().Context(), req.Email)
@@ -44,14 +38,14 @@ func Login(c echo.Context) error {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return c.JSON(http.StatusNotFound, echo.Map{
 				"status": "failed",
-				"error": "user not found",
+				"error":  "user not found",
 			})
 		}
 
 		logger.Infof("received error from database %v", err.Error())
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error": "some error occurred",
+			"error":  "some error occurred",
 		})
 	}
 
@@ -59,12 +53,12 @@ func Login(c echo.Context) error {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return c.JSON(http.StatusConflict, echo.Map{
 				"status": "failed",
-				"error": "invalid password",
+				"error":  "invalid password",
 			})
 		}
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error": "some error occurred",
+			"error":  "some error occurred",
 		})
 	}
 
@@ -72,7 +66,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error": "failed to generate token A",
+			"error":  "failed to generate token A",
 		})
 	}
 
@@ -80,7 +74,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error": "failed to generate token R",
+			"error":  "failed to generate token R",
 		})
 	}
 
@@ -90,7 +84,7 @@ func Login(c echo.Context) error {
 		logger.Errorf(fmt.Sprintf("failed to set token in cache %v", err.Error()))
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error": "failed to set token in cache",
+			"error":  "failed to set token in cache",
 		})
 	}
 
@@ -121,7 +115,7 @@ func Login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{
-		"status": "success",
+		"status":  "success",
 		"message": "Login successful",
 		"data":    data,
 	})
