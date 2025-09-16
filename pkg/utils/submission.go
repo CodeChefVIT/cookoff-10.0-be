@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 
 )
 
@@ -16,6 +17,7 @@ type SubmissionInput struct {
 	UserID     string
 }
 // place holder code -- renove when queue is setup
+
 func SaveSubmission(sub SubmissionInput) error {
 	if Queries == nil {
 		return fmt.Errorf("DB Queries not initialized")
@@ -44,4 +46,18 @@ func SaveSubmission(sub SubmissionInput) error {
 		
 	})
 	return err
+}
+func GetSubmissionIDByToken(token string) (string, error) {
+	if RedisClient == nil {
+		return "", errors.New("redis client not initialized")
+	}
+
+	ctx := context.Background()
+	submissionID, err := RedisClient.Get(ctx, "token:"+token).Result()
+	if err == redis.Nil {
+		return "", errors.New("token not found")
+	} else if err != nil {
+		return "", err
+	}
+	return submissionID, nil
 }
