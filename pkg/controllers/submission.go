@@ -55,19 +55,7 @@ func SubmitCode(c echo.Context) error {
         }
     }
 
-	sub := utils.SubmissionInput{
-		ID:         submissionID,
-		QuestionID: req.QuestionID,
-		LanguageID: req.LanguageID,
-		SourceCode: req.SourceCode,
-		UserID:     req.UserID,
-	}
-	if err := utils.SaveSubmission(sub); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save submission record"})
-	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"submission_id": submissionID,
-		"tokens":        tokens,
 	})
 }
