@@ -49,6 +49,11 @@ func SubmitCode(c echo.Context) error {
 		fmt.Println("CreateBatchSubmission error:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create batch submission"})
 	}
+	for _, token := range tokens {
+        if err := utils.TokenCache.Set(utils.Ctx, token, submissionID, 0).Err(); err != nil {
+            fmt.Printf("Failed to cache token %s: %v\n", token, err)
+        }
+    }
 
 	sub := utils.SubmissionInput{
 		ID:         submissionID,

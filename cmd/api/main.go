@@ -20,6 +20,7 @@ func main() {
 	logger.InitLogger()
 	utils.LoadConfig()
 	utils.InitCache()
+	utils.InitTokenCache()
 	utils.InitDB()
 	validator.InitValidator()
 
