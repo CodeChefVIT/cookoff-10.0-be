@@ -342,6 +342,42 @@ paths:
         "500":
           description: Internal server error
 
+    put:
+      summary: Update a test case
+      tags:
+        - Test Cases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTestCaseRequest"
+      responses:
+        "200":
+          description: Test case updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_case:
+                    $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid UUID or request
+        "404":
+          description: Test case not found
+        "500":
+          description: Internal server error
+
   /question/{id}/testcases:
     get:
       summary: Get all test cases for a question (admin only)
@@ -429,43 +465,6 @@ paths:
                     $ref: "#/components/schemas/TestCase"
         "400":
           description: Invalid request
-        "500":
-          description: Internal server error
-
-  /testcase/{id}:
-    put:
-      summary: Update a test case
-      tags:
-        - Test Cases
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateTestCaseRequest"
-      responses:
-        "200":
-          description: Test case updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  test_case:
-                    $ref: "#/components/schemas/TestCase"
-        "400":
-          description: Invalid UUID or request
-        "404":
-          description: Test case not found
         "500":
           description: Internal server error
 
