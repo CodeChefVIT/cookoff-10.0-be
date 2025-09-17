@@ -22,15 +22,15 @@ WHERE id = $1;
 SELECT *
 FROM users;
 
--- name: UpgradeUsersToRound :exec
+-- name: UpgradeUserToRound :exec
 UPDATE users
-SET round_qualified = $2
-WHERE id::TEXT = ANY($1::TEXT[]);
+SET round_qualified = round_qualified + 1
+WHERE id = $1;
 
 -- name: BanUser :exec
-UPDATE users
-SET is_banned = TRUE
+UPDATE users SET is_banned = TRUE
 WHERE id = $1;
+
 -- name: UnbanUser :exec
 UPDATE users
 SET is_banned = FALSE
@@ -43,3 +43,17 @@ order by score;
 -- name: UpdateProfile :exec
 UPDATE users SET reg_no = $1, password = $2, name = $3
 WHERE id = $4;
+
+-- name: GetSubmissionByUser :many
+SELECT id, question_id, testcases_passed, testcases_failed, runtime,
+       submission_time, source_code, language_id, description, memory,
+       user_id, status
+FROM submissions
+WHERE user_id = $1;
+
+-- name: GetUsersWithCursor :many
+SELECT id, email, reg_no, password, role, round_qualified, score, name, is_banned
+FROM users
+WHERE ($1::uuid IS NULL OR id > $1)
+ORDER BY id ASC
+LIMIT $2;

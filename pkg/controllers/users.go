@@ -44,7 +44,10 @@ func GetAllUsers(c echo.Context) error {
 		}
 	}
 
-	users, err := utils.Queries.GetUsersWithCursor(c.Request().Context(), cursor, limit)
+	users, err := utils.Queries.GetUsersWithCursor(c.Request().Context(), db.GetUsersWithCursorParams{
+		Column1: *cursor,
+		Limit:   limit,
+	})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "Could not get users",
