@@ -9,7 +9,7 @@ import (
 func RegisterRoute(e *echo.Echo) {
 	e.GET("/ping", controllers.Ping)
 	e.GET("/docs", controllers.Docs)
-	e.POST("/signup", controllers.Signup, middlewares.AdminOnly)
+	e.POST("/signup", controllers.Signup)
 	e.POST(("/jakabutarja"), controllers.SubmitCode)
 	e.POST("/login", controllers.Login)
 	e.POST("/logout", controllers.Logout)
