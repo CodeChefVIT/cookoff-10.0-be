@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/google/uuid"
-
+	
 )
 
 type SubmissionInput struct {
@@ -16,6 +16,7 @@ type SubmissionInput struct {
 	UserID     string
 }
 // place holder code -- renove when queue is setup
+
 func SaveSubmission(sub SubmissionInput) error {
 	if Queries == nil {
 		return fmt.Errorf("DB Queries not initialized")
