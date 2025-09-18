@@ -3,6 +3,7 @@ package workers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/big"
 	"strings"
@@ -151,20 +152,20 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	// tokenCount, err := submission.Tokens.GetTokenCount(ctx, value)
-	// if err != nil {
-	// 	log.Println("Error getting token count: ", err)
-	// 	return err
-	// }
+	tokenCount, err := utils.GetTokenCount(ctx, value)
+	if err != nil {
+		log.Println("Error getting token count: ", err)
+		return err
+	}
 
-	// fmt.Println("Token :- ", tokenCount)
+	fmt.Println("Token :- ", tokenCount)
 
-	// if tokenCount == 0 {
-	// 	err = submission.UpdateSubmission(ctx, idUUID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	if tokenCount == 0 {
+		err = utils.UpdateSubmission(ctx, idUUID)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
