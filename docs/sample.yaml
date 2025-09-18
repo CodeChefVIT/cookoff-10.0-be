@@ -309,6 +309,84 @@ paths:
           description: Invalid UUID
         "500":
           description: Internal server error
+  
+  /question/round:
+    get:
+      summary: Get the questions in the user's current round
+      tags:
+        - Questions
+      responses:
+        "200":
+          description: Successfully fetched questions and testcases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  round:
+                    type: integer
+                    example: 1
+                  questions_testcases:
+                    type: array
+                    description: Array of question–testcase pairs
+                    items:
+                      type: object
+                      properties:
+                        question:
+                          $ref: "#/components/schemas/Question"
+                        testcases:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid round or missing/invalid JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: round number is invalid
+                  error:
+                    type: string
+                    example: "Error Getting user_id"
+        "401":
+          description: Unauthorized — missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal server error (e.g. DB failure, missing testcases)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: unable to fetch the questions
+                  question_id:
+                    type: string
+                    format: uuid
+                    description: Included if fetching testcases for a question fails
+                  error:
+                    type: string
+                    example: "pq: relation \"questions\" does not exist"
 
 components:
   schemas:
@@ -389,7 +467,7 @@ components:
               description: Round qualified (0 or 1)
               example: 1
             score:
-              type: string
+              type: integer
               description: User score (numeric type from Postgres)
               example: 100
     Question:
@@ -442,7 +520,43 @@ components:
         - sampleTestInput
         - sampleTestOutput
         - explanation
-
+    TestCase:
+      type: object
+      description: A test case for a question
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the test case
+        expected_output:
+          type: string
+          description: The expected output for the given input
+        memory:
+          type: number
+          format: double
+          description: Memory limit for this test case (numeric value)
+        input:
+          type: string
+          description: The input provided to the program
+        hidden:
+          type: boolean
+          description: Whether the test case is hidden from the user
+        runtime:
+          type: number
+          format: double
+          description: Runtime limit for this test case (decimal value)
+        question_id:
+          type: string
+          format: uuid
+          description: ID of the question this test case belongs to
+      required:
+        - id
+        - expected_output
+        - memory
+        - input
+        - hidden
+        - runtime
+        - question_id
     CreateQuestionParams:
       type: object
       properties:
