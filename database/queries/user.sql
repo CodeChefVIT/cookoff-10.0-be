@@ -57,3 +57,8 @@ FROM users
 WHERE ($1::uuid IS NULL OR id > $1)
 ORDER BY id ASC
 LIMIT $2;
+
+-- name: GetUserRound :one
+SELECT round_qualified
+FROM users
+WHERE id = $1;

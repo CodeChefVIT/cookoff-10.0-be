@@ -51,3 +51,8 @@ WHERE id = $1;
 
 -- name: DeleteQuestion :exec
 DELETE FROM questions WHERE id = $1;
+
+-- name: GetQuestionsByRound :many
+SELECT * FROM questions
+WHERE round = $1
+ORDER BY qType;

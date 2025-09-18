@@ -22,6 +22,7 @@ func RegisterRoute(e *echo.Echo) {
 	e.GET("/question", controllers.GetAllQuestions)
 	e.GET("/question/:id", controllers.GetQuestion)
 	e.PUT("/question/:id", controllers.UpdateQuestion)
+	e.GET("/question/round", controllers.GetQuestionsByRound)
 	e.DELETE("/question/:id", controllers.DeleteQuestion, middlewares.AdminOnly)
 	e.POST("/question/:id/bounty/activate", controllers.ActivateBounty, middlewares.AdminOnly)
 	e.POST("/question/:id/bounty/deactivate", controllers.DeactivateBounty, middlewares.AdminOnly)
