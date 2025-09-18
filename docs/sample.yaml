@@ -309,7 +309,7 @@ paths:
           description: Invalid UUID
         "500":
           description: Internal server error
-  
+
   /question/round:
     get:
       summary: Get the questions in the user's current round
@@ -386,7 +386,7 @@ paths:
                     description: Included if fetching testcases for a question fails
                   error:
                     type: string
-                    example: "pq: relation \"questions\" does not exist"
+                    example: 'pq: relation "questions" does not exist'
 
   /testcase/{id}:
     get:
@@ -1098,7 +1098,7 @@ components:
           type: string
           example: "tokens refreshed"
 
-    TestCase:
+    TestCases:
       type: object
       properties:
         id:
