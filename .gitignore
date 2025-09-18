@@ -21,6 +21,8 @@ tmp/
 # IDE specific files
 .vscode
 .idea
+*.rest
+dump.txt
 
 # .env file
 .env
