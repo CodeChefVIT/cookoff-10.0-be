@@ -116,3 +116,60 @@ func (q *Queries) GetSubmissionByID(ctx context.Context, id uuid.UUID) (GetSubmi
 	)
 	return i, err
 }
+
+const updateScore = `-- name: UpdateScore :exec
+WITH best_submissions AS (
+    SELECT 
+        s.user_id AS user_id,
+        s.question_id,
+        MAX((s.testcases_passed) * q.points / (s.testcases_passed + s.testcases_failed)::numeric) AS best_score
+    FROM submissions s
+    INNER JOIN questions q ON s.question_id = q.id
+    INNER JOIN users u on s.user_id = u.id 
+    WHERE s.user_id = (select user_id from submissions where id = $1) AND q.round = u.round_qualified
+    GROUP BY s.user_id, s.question_id
+)
+UPDATE users
+SET score = (
+    SELECT SUM(best_score)
+    FROM best_submissions
+)
+WHERE users.id = (select user_id from submissions s where s.id = $1)
+`
+
+func (q *Queries) UpdateScore(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, updateScore, id)
+	return err
+}
+
+const updateSubmission = `-- name: UpdateSubmission :exec
+UPDATE submissions
+SET 
+    runtime = $1, 
+    memory = $2, 
+    status = $3,
+    testcases_passed = $4,
+    testcases_failed = $5
+WHERE id = $6
+`
+
+type UpdateSubmissionParams struct {
+	Runtime         pgtype.Numeric
+	Memory          pgtype.Numeric
+	Status          *string
+	TestcasesPassed pgtype.Int4
+	TestcasesFailed pgtype.Int4
+	ID              uuid.UUID
+}
+
+func (q *Queries) UpdateSubmission(ctx context.Context, arg UpdateSubmissionParams) error {
+	_, err := q.db.Exec(ctx, updateSubmission,
+		arg.Runtime,
+		arg.Memory,
+		arg.Status,
+		arg.TestcasesPassed,
+		arg.TestcasesFailed,
+		arg.ID,
+	)
+	return err
+}
