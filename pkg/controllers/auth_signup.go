@@ -33,6 +33,13 @@ func Signup(c echo.Context) error {
 		})
 	}
 
+	if payload.Key != utils.Config.SecretKey {
+		return c.JSON(http.StatusUnauthorized, echo.Map{
+			"status": "failed",
+			"error":  "stfu",
+		})
+	}
+
 	_, err := utils.Queries.GetUserByEmail(c.Request().Context(), payload.Email)
 	if err == nil {
 		return c.JSON(http.StatusConflict, echo.Map{
