@@ -30,3 +30,4 @@ dump.txt
 # Project build
 main
 *templ.go
+.DS_Store
