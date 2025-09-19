@@ -17,7 +17,7 @@ func RegisterRoute(e *echo.Echo) {
 	e.POST("/callback", controllers.CallbackUrl)
 
 	// API group with JWT authentication
-	api := e.Group("/")
+	api := e.Group("")
 	api.Use(middlewares.VerifyJWTMiddleware)
 
 	// Authenticated user routes
