@@ -18,6 +18,7 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	e.POST("/callback", func(c echo.Context) error {
 		return controllers.CallbackUrl(c, taskClient)
 	})
+	// e.POST("/submit", controllers.SubmitCode)
 
 	// API group with JWT authentication
 	api := e.Group("")

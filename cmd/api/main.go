@@ -36,7 +36,7 @@ func main() {
 
 	go func() {
 		mux := asynq.NewServeMux()
-		mux.HandleFunc(queue.TypeJudge0Callback, workers.ProcessJudge0CallbackTask)
+		mux.HandleFunc("submission:process", workers.ProcessJudge0CallbackTask)
 		queue.StartQueueServer(taskServer, mux)
 	}()
 
