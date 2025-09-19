@@ -9,3 +9,15 @@ SELECT
     status
 FROM submission_results
 WHERE submission_id = $1;
+
+-- name: GetSubmissionResultsBySubmissionID :many
+SELECT id,
+       testcase_id,
+       submission_id,
+       runtime,
+       memory,
+       points_awarded,
+       status,
+       description
+FROM submission_results
+WHERE submission_id = $1;
