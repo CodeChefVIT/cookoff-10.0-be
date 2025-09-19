@@ -2,53 +2,46 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
+	"log"
 	"net/http"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
+	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/hibiken/asynq"
 	"github.com/labstack/echo/v4"
 )
 
-func CallbackUrl(c echo.Context) error {
-	body, err := io.ReadAll(c.Request().Body)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": fmt.Errorf("failed to read request body: %w", err).Error(),
-		})
-	}
+const TypeProcessSubmission = "submission:process"
 
-	fmt.Printf("Judge0 Callback JSON: %s\n", string(body))
+func CallbackUrl(c echo.Context, taskClient *asynq.Client) error {
+	logger.Infof("Judge0 Callback JSON: %s\n")
 
-	// Parse the Judge0 callback payload
 	var callbackPayload dto.Judge0CallbackPayload
-	if err := json.Unmarshal(body, &callbackPayload); err != nil {
+	if err := c.Bind(&callbackPayload); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": fmt.Errorf("failed to parse Judge0 callback payload: %w", err).Error(),
+			"error": "Invalid request body",
 		})
 	}
 
-	// Enqueue the callback for processing
-	if queue.TaskClient != nil {
-		// Serialize payload to JSON bytes
-		payloadBytes, err := json.Marshal(callbackPayload)
-		if err != nil {
-			fmt.Printf("Failed to marshal Judge0 callback payload: %v\n", err)
-		} else {
-			task := asynq.NewTask(queue.TypeJudge0Callback, payloadBytes)
-			_, err = queue.TaskClient.Enqueue(task, asynq.Queue("judge0"))
-			if err != nil {
-				fmt.Printf("Failed to enqueue Judge0 callback: %v\n", err)
-				// Don't return error to Judge0, just log it
-			} else {
-				fmt.Printf("Successfully enqueued Judge0 callback for submission %s\n", callbackPayload.SubmissionID)
-			}
-		}
-	} else {
-		fmt.Println("TaskClient not initialized, skipping enqueue")
+	payload, err := json.Marshal(callbackPayload)
+	if err != nil {
+		logger.Errorf("Failed to marshal payload: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error queueing request",
+		})
 	}
+
+	task := asynq.NewTask("submission:process", payload)
+	info, err := taskClient.Enqueue(task)
+	if err != nil {
+		logger.Errorf("Failed to enqueue task: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error queueing request",
+		})
+	}
+	logger.Infof("Enqueued task: %+v, Queue: %s", info.ID, info.Queue)
+
+	log.Println("Task enqueued successfully")
 
 	return c.NoContent(http.StatusOK)
 }

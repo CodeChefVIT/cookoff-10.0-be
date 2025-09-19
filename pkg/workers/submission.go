@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
@@ -30,7 +31,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	timeValue, err := parseTime(data.Runtime)
+	timeValue, err := parseTime(data.Time)
 	if err != nil {
 		log.Println("Error parsing time value: ", err)
 		return err
@@ -57,7 +58,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 	}
 
 	switch data.Status.ID {
-	case 1:
+	case "1":
 		err = handleCompilationError(
 			ctx,
 			idUUID,
@@ -66,7 +67,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"In Queue",
 		)
-	case 2:
+	case "2":
 		err = handleCompilationError(
 			ctx,
 			idUUID,
@@ -75,7 +76,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"Processing",
 		)
-	case 3:
+	case "3":
 		// testcasesPassed++
 		err = handleCompilationError(
 			ctx,
@@ -84,7 +85,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			int(timeValue*1000),
 			testidUUID,
 			"success")
-	case 4:
+	case "4":
 		// testcasesFailed++
 		err = handleCompilationError(
 			ctx,
@@ -94,7 +95,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"wrong answer",
 		)
-	case 5:
+	case "5":
 		err = handleCompilationError(
 			ctx,
 			idUUID,
@@ -103,7 +104,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"Time Limit Exceeded",
 		)
-	case 6:
+	case "6":
 		// testcasesFailed++
 		err = handleCompilationError(
 			ctx,
@@ -113,7 +114,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"Compilation error",
 		)
-	case 7, 8, 9, 10, 11, 12:
+	case "7", "8", "9", "10", "11", "12":
 		// testcasesFailed++
 		err = handleCompilationError(
 			ctx,
@@ -123,7 +124,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"Runtime error",
 		)
-	case 13:
+	case "13":
 		err = handleCompilationError(
 			ctx,
 			idUUID,
@@ -132,7 +133,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 			testidUUID,
 			"Internal Error",
 		)
-	case 14:
+	case "14":
 		err = handleCompilationError(
 			ctx,
 			idUUID,
@@ -170,8 +171,16 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 	return nil
 }
 
-func parseTime(time int) (float64, error) {
-	timeValue := float64(time)
+func parseTime(timeStr string) (float64, error) {
+	if timeStr == "" {
+		log.Println("Time value is empty, setting time to 0 for this submission.")
+		return 0, nil
+	}
+
+	timeValue, err := strconv.ParseFloat(timeStr, 64)
+	if err != nil {
+		return 0, err
+	}
 	return timeValue, nil
 }
 
