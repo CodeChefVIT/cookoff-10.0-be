@@ -37,3 +37,17 @@ func VerifyJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
+
+// RequireAuthExcept applies VerifyJWTMiddleware to all requests except those in the skip map.
+// Keys of the map are exact path strings to skip (value is ignored).
+func RequireAuthExcept(skip map[string]bool) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			path := c.Request().URL.Path
+			if skip[path] {
+				return next(c)
+			}
+			return VerifyJWTMiddleware(next)(c)
+		}
+	}
+}

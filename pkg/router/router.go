@@ -7,6 +7,15 @@ import (
 )
 
 func RegisterRoute(e *echo.Echo) {
+	e.Use(middlewares.RequireAuthExcept(map[string]bool{
+		"/signup":      true,
+		"/login":       true,
+		"/logout":      true,
+		"/refreshToken": true,
+		"/docs":        true,
+		"/ping":        true,
+		"/callback":    true,
+	}))
 	e.GET("/ping", controllers.Ping)
 	e.GET("/docs", controllers.Docs)
 	e.POST("/signup", controllers.Signup)
