@@ -4,17 +4,20 @@ package router
 import (
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/controllers"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/middlewares"
+	"github.com/hibiken/asynq"
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterRoute(e *echo.Echo) {
-	// Public routes - no authentication required
+func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	e.GET("/ping", controllers.Ping)
 	e.GET("/docs", controllers.Docs)
 	e.POST("/signup", controllers.Signup)
 	e.POST("/login", controllers.Login)
 	e.POST("/refreshToken", controllers.RefreshToken)
-	e.POST("/callback", controllers.CallbackUrl)
+	// e.POST("/callback", controllers.CallbackUrl)
+	e.POST("/callback", func(c echo.Context) error {
+		return controllers.CallbackUrl(c, taskClient)
+	})
 
 	// API group with JWT authentication
 	api := e.Group("/")

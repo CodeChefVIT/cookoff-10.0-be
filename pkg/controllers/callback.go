@@ -12,7 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CallbackUrl(c echo.Context) error {
+func CallbackUrl(c echo.Context, taskClient *asynq.Client) error {
 	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
