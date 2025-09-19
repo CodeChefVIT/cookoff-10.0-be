@@ -20,7 +20,7 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	})
 
 	// API group with JWT authentication
-	api := e.Group("/")
+	api := e.Group("")
 	api.Use(middlewares.VerifyJWTMiddleware)
 
 	// Authenticated user routes
