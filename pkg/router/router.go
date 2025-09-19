@@ -24,6 +24,8 @@ func RegisterRoute(e *echo.Echo) {
 	api.POST("/logout", controllers.Logout)
 	api.POST("/jakabutarja", controllers.SubmitCode)
 
+	api.GET("/dashboard", controllers.LoadDashboard)
+
 	// Question routes
 	questionRoutes(api)
 
