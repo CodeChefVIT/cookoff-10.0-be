@@ -3,9 +3,9 @@ package utils
 import (
 	"context"
 	"fmt"
+
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/google/uuid"
-	
 )
 
 type SubmissionInput struct {
@@ -15,6 +15,7 @@ type SubmissionInput struct {
 	SourceCode string
 	UserID     string
 }
+
 // place holder code -- renove when queue is setup
 
 func SaveSubmission(sub SubmissionInput) error {
@@ -41,8 +42,7 @@ func SaveSubmission(sub SubmissionInput) error {
 		LanguageID: int32(sub.LanguageID),
 		SourceCode: sub.SourceCode,
 		Status:     &status,
-		UserID:     uuid.NullUUID{UUID: userID, Valid: true},
-		
+		UserID:     userID,
 	})
 	return err
 }

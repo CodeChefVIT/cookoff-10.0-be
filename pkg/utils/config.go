@@ -17,6 +17,7 @@ type cfg struct {
 	RedisHost        string `env:"REDIS_HOST,notEmpty"`
 	RedisPort        string `env:"REDIS_PORT,notEmpty"`
 	RedisPassword    string `env:"REDIS_PASSWORD,notEmpty"`
+	SecretKey        string `env:"SECRET_KEY,notEmpty"`
 }
 
 var Config cfg

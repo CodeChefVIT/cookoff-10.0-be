@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -64,6 +65,70 @@ func GetAllQuestions(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status":    "success",
 		"questions": questions,
+	})
+}
+
+func GetQuestionsByRound(c echo.Context) error {
+
+	userID, err := auth.GetUserID(c)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"status":  "Failed",
+			"message": "Error Getting user_id",
+			"error":   err.Error(),
+		})
+	}
+
+	round, err := utils.Queries.GetUserRound(c.Request().Context(), userID)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status":  "Failed",
+			"message": "could not get the users current round",
+			"error":   err.Error(),
+		})
+	}
+
+	if round < 0 || round > 3 {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"status":  "Failed",
+			"message": "round number is invalid",
+		})
+	}
+
+	questions, err := utils.Queries.GetQuestionsByRound(c.Request().Context(), int32(round))
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status":  "Failed",
+			"message": "unable to fetch the questions",
+			"error":   err.Error(),
+		})
+	}
+
+	result := []echo.Map{}
+
+	for _, q := range questions {
+		testcases, err := utils.Queries.GetTestCasesByQuestion(c.Request().Context(), q.ID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"status":      "Failed",
+				"message":     "Could not get the testcases for question",
+				"question_id": q.ID,
+				"error":       err.Error(),
+			})
+		}
+		result = append(result, echo.Map{
+			"question":  q,
+			"testcases": testcases,
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"status":              "success",
+		"round":               round,
+		"questions_testcases": result,
 	})
 }
 

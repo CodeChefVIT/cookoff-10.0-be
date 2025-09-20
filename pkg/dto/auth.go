@@ -9,4 +9,5 @@ type SignupRequest struct {
 	Email string `json:"email"    validate:"required,email"`
 	Name  string `json:"name"     validate:"required"`
 	RegNo string `json:"reg_no"   validate:"required"`
+	Key   string `json:"shut_up"  validate:"required"`
 }

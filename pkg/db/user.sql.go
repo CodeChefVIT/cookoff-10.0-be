@@ -13,8 +13,7 @@ import (
 )
 
 const banUser = `-- name: BanUser :exec
-UPDATE users
-SET is_banned = TRUE
+UPDATE users SET is_banned = TRUE
 WHERE id = $1
 `
 
@@ -101,50 +100,9 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 	return items, nil
 }
 
-const getUsersWithCursor = `-- name: GetUsersWithCursor :many
-SELECT id, email, reg_no, password, role, round_qualified, score, name, is_banned
-FROM users
-WHERE ($1::uuid IS NULL OR id > $1)
-ORDER BY id ASC
-LIMIT $2
-`
-
-func (q *Queries) GetUsersWithCursor(ctx context.Context, cursor *uuid.UUID, limit int32) ([]User, error) {
-	rows, err := q.db.Query(ctx, getUsersWithCursor, cursor, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
-			&i.RegNo,
-			&i.Password,
-			&i.Role,
-			&i.RoundQualified,
-			&i.Score,
-			&i.Name,
-			&i.IsBanned,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getLeaderboard = `-- name: GetLeaderboard :many
-SELECT id, name, score
-FROM users
-ORDER BY score DESC
+select id, name, score from users
+order by score
 `
 
 type GetLeaderboardRow struct {
@@ -163,6 +121,47 @@ func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, erro
 	for rows.Next() {
 		var i GetLeaderboardRow
 		if err := rows.Scan(&i.ID, &i.Name, &i.Score); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSubmissionByUser = `-- name: GetSubmissionByUser :many
+SELECT id, question_id, testcases_passed, testcases_failed, runtime,
+       submission_time, source_code, language_id, description, memory,
+       user_id, status
+FROM submissions
+WHERE user_id = $1
+`
+
+func (q *Queries) GetSubmissionByUser(ctx context.Context, userID uuid.UUID) ([]Submission, error) {
+	rows, err := q.db.Query(ctx, getSubmissionByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Submission
+	for rows.Next() {
+		var i Submission
+		if err := rows.Scan(
+			&i.ID,
+			&i.QuestionID,
+			&i.TestcasesPassed,
+			&i.TestcasesFailed,
+			&i.Runtime,
+			&i.SubmissionTime,
+			&i.SourceCode,
+			&i.LanguageID,
+			&i.Description,
+			&i.Memory,
+			&i.UserID,
+			&i.Status,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -242,6 +241,62 @@ func (q *Queries) GetUserByUsername(ctx context.Context, name string) (User, err
 	return i, err
 }
 
+const getUserRound = `-- name: GetUserRound :one
+SELECT round_qualified
+FROM users
+WHERE id = $1
+`
+
+func (q *Queries) GetUserRound(ctx context.Context, id uuid.UUID) (int32, error) {
+	row := q.db.QueryRow(ctx, getUserRound, id)
+	var round_qualified int32
+	err := row.Scan(&round_qualified)
+	return round_qualified, err
+}
+
+const getUsersWithCursor = `-- name: GetUsersWithCursor :many
+SELECT id, email, reg_no, password, role, round_qualified, score, name, is_banned
+FROM users
+WHERE ($1::uuid IS NULL OR id > $1)
+ORDER BY id ASC
+LIMIT $2
+`
+
+type GetUsersWithCursorParams struct {
+	Column1 uuid.UUID
+	Limit   int32
+}
+
+func (q *Queries) GetUsersWithCursor(ctx context.Context, arg GetUsersWithCursorParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUsersWithCursor, arg.Column1, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.RegNo,
+			&i.Password,
+			&i.Role,
+			&i.RoundQualified,
+			&i.Score,
+			&i.Name,
+			&i.IsBanned,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const unbanUser = `-- name: UnbanUser :exec
 UPDATE users
 SET is_banned = FALSE
@@ -284,55 +339,4 @@ WHERE id = $1
 func (q *Queries) UpgradeUserToRound(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, upgradeUserToRound, id)
 	return err
-}
-
-const enableRound = `-- name: EnableRound :exec
-UPDATE users
-SET round_qualified = 1
-`
-
-func (q *Queries) EnableRound(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, enableRound)
-	return err
-}
-
-const getSubmissionByUser = `-- name: GetSubmissionByUser :many
-SELECT id, question_id, testcases_passed, testcases_failed, runtime,
-       submission_time, source_code, language_id, description, memory,
-       user_id, status
-FROM submissions
-WHERE user_id = $1
-`
-
-func (q *Queries) GetSubmissionByUser(ctx context.Context, id uuid.UUID) ([]Submission, error) {
-	rows, err := q.db.Query(ctx, getSubmissionByUser, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Submission
-	for rows.Next() {
-		var i Submission
-		if err := rows.Scan(
-			&i.ID,
-			&i.QuestionID,
-			&i.TestcasesPassed,
-			&i.TestcasesFailed,
-			&i.Runtime,
-			&i.SubmissionTime,
-			&i.SourceCode,
-			&i.LanguageID,
-			&i.Description,
-			&i.Memory,
-			&i.UserID,
-			&i.Status,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }

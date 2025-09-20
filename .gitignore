@@ -21,6 +21,8 @@ tmp/
 # IDE specific files
 .vscode
 .idea
+*.rest
+dump.txt
 
 # .env file
 .env
@@ -28,3 +30,4 @@ tmp/
 # Project build
 main
 *templ.go
+.DS_Store

@@ -139,6 +139,46 @@ func (q *Queries) GetQuestion(ctx context.Context, id uuid.UUID) (Question, erro
 	return i, err
 }
 
+const getQuestionsByRound = `-- name: GetQuestionsByRound :many
+SELECT id, description, title, qtype, isbountyactive, input_format, points, round, constraints, output_format, sample_test_input, sample_test_output, explanation FROM questions
+WHERE round = $1
+ORDER BY qType
+`
+
+func (q *Queries) GetQuestionsByRound(ctx context.Context, round int32) ([]Question, error) {
+	rows, err := q.db.Query(ctx, getQuestionsByRound, round)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Question
+	for rows.Next() {
+		var i Question
+		if err := rows.Scan(
+			&i.ID,
+			&i.Description,
+			&i.Title,
+			&i.Qtype,
+			&i.Isbountyactive,
+			&i.InputFormat,
+			&i.Points,
+			&i.Round,
+			&i.Constraints,
+			&i.OutputFormat,
+			&i.SampleTestInput,
+			&i.SampleTestOutput,
+			&i.Explanation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateQuestion = `-- name: UpdateQuestion :exec
 UPDATE questions
 SET description = $2,

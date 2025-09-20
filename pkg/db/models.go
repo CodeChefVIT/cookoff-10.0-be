@@ -36,7 +36,7 @@ type Submission struct {
 	LanguageID      int32
 	Description     *string
 	Memory          pgtype.Numeric
-	UserID          uuid.NullUUID
+	UserID          uuid.UUID
 	Status          *string
 }
 

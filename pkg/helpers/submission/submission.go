@@ -21,11 +21,12 @@ type SubmissionInput struct {
 }
 
 type Judge0Submission struct {
-	LanguageID     int    `json:"language_id"`
-	SourceCode     string `json:"source_code"`
-	Stdin          string `json:"stdin,omitempty"`
-	ExpectedOutput string `json:"expected_output,omitempty"`
-	Callback       string `json:"callback_url,omitempty"`
+	LanguageID     int     `json:"language_id"`
+	SourceCode     string  `json:"source_code"`
+	Stdin          string  `json:"stdin,omitempty"`
+	ExpectedOutput string  `json:"expected_output,omitempty"`
+	Runtime        float64 `json:"cpu_time_limit"`
+	Callback       string  `json:"callback_url,omitempty"`
 }
 
 func CreateBatchSubmission(submissionID, sourceCode string, languageID int, testcases []map[string]string) ([]string, error) {
@@ -36,12 +37,18 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 		return nil, errors.New("CALLBACK_URL not set in environment")
 	}
 
+	runtime_mut, err := RuntimeMut(languageID)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, tc := range testcases {
 		submissions = append(submissions, Judge0Submission{
 			LanguageID:     languageID,
 			SourceCode:     sourceCode,
 			Stdin:          tc["input"],
 			ExpectedOutput: tc["output"],
+			Runtime:        float64(runtime_mut),
 			Callback:       callbackURL,
 		})
 	}
@@ -55,7 +62,6 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal submissions: %v", err)
 	}
-
 
 	judge0URI := os.Getenv("JUDGE0_URI")
 	if judge0URI == "" {

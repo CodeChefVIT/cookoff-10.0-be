@@ -4,7 +4,7 @@ info:
   description: API Documentation
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
+  - url: https://kabutar.codechefvit.com
     description: Local server
 paths:
   /signup:
@@ -147,7 +147,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /questions:
+  /question:
     post:
       summary: Create a new question
       tags:
@@ -198,7 +198,7 @@ paths:
         "500":
           description: Internal server error
 
-  /questions/{id}:
+  /question/{id}:
     get:
       summary: Get a question by ID
       tags:
@@ -270,8 +270,7 @@ paths:
           description: Invalid UUID
         "500":
           description: Internal server error
-
-  /questions/{id}/bounty/activate:
+  /question/{id}/bounty/activate:
     put:
       summary: Activate bounty for a question
       tags:
@@ -291,7 +290,7 @@ paths:
         "500":
           description: Internal server error
 
-  /questions/{id}/bounty/deactivate:
+  /question/{id}/bounty/deactivate:
     put:
       summary: Deactivate bounty for a question
       tags:
@@ -311,6 +310,602 @@ paths:
         "500":
           description: Internal server error
 
+  /question/round:
+    get:
+      summary: Get the questions in the user's current round
+      tags:
+        - Questions
+      responses:
+        "200":
+          description: Successfully fetched questions and testcases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  round:
+                    type: integer
+                    example: 1
+                  questions_testcases:
+                    type: array
+                    description: Array of question–testcase pairs
+                    items:
+                      type: object
+                      properties:
+                        question:
+                          $ref: "#/components/schemas/Question"
+                        testcases:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid round or missing/invalid JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: round number is invalid
+                  error:
+                    type: string
+                    example: "Error Getting user_id"
+        "401":
+          description: Unauthorized — missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized
+        "500":
+          description: Internal server error (e.g. DB failure, missing testcases)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: unable to fetch the questions
+                  question_id:
+                    type: string
+                    format: uuid
+                    description: Included if fetching testcases for a question fails
+                  error:
+                    type: string
+                    example: 'pq: relation "questions" does not exist'
+
+  /testcase/{id}:
+    get:
+      summary: Get a test case by ID
+      tags:
+        - Test Cases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Test case found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_case:
+                    $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid UUID
+        "404":
+          description: Test case not found
+        "500":
+          description: Internal server error
+
+    put:
+      summary: Update a test case
+      tags:
+        - Test Cases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTestCaseRequest"
+      responses:
+        "200":
+          description: Test case updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_case:
+                    $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid UUID or request
+        "404":
+          description: Test case not found
+        "500":
+          description: Internal server error
+
+  /question/{id}/testcases:
+    get:
+      summary: Get all test cases for a question (admin only)
+      tags:
+        - Test Cases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of test cases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_cases:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid UUID
+        "500":
+          description: Internal server error
+
+  /question/{id}/testcases/public:
+    get:
+      summary: Get public test cases for a question
+      tags:
+        - Test Cases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of public test cases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_cases:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid UUID
+        "500":
+          description: Internal server error
+
+  /testcase:
+    post:
+      summary: Create a new test case
+      tags:
+        - Test Cases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTestCaseRequest"
+      responses:
+        "201":
+          description: Test case created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_case:
+                    $ref: "#/components/schemas/TestCase"
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+
+    delete:
+      summary: Delete a test case
+      tags:
+        - Test Cases
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Test case deleted successfully
+        "400":
+          description: Invalid UUID
+        "404":
+          description: Test case not found
+        "500":
+          description: Internal server error
+
+  /testcases:
+    get:
+      summary: Get all test cases (admin only)
+      tags:
+        - Test Cases
+      responses:
+        "200":
+          description: List of all test cases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  test_cases:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TestCase"
+        "500":
+          description: Internal server error
+
+  /jakabutarja:
+    post:
+      summary: Submit code for evaluation
+      tags:
+        - Submissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionRequest"
+      responses:
+        "200":
+          description: Submission accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+
+  /callback:
+    post:
+      summary: Judge0 callback endpoint (internal use only)
+      tags:
+        - Submissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Judge0CallbackPayload"
+      responses:
+        "200":
+          description: Callback processed successfully
+        "400":
+          description: Invalid request
+        "500":
+          description: Internal server error
+
+  /users:
+    get:
+      summary: Get all users (admin only)
+      tags:
+        - Users
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: Number of users to return
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Cursor for pagination
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+        "500":
+          description: Internal server error
+
+  /users/{id}/ban:
+    post:
+      summary: Ban a user (admin only)
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: User banned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        "400":
+          description: Invalid UUID
+        "500":
+          description: Internal server error
+
+  /users/{id}/unban:
+    post:
+      summary: Unban a user (admin only)
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: User unbanned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        "400":
+          description: Invalid UUID
+        "500":
+          description: Internal server error
+
+  /leaderboard:
+    get:
+      summary: Get leaderboard (admin only)
+      tags:
+        - Users
+      responses:
+        "200":
+          description: Leaderboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  leaderboard:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        score:
+                          type: number
+        "500":
+          description: Internal server error
+
+  /users/{id}/upgrade:
+    post:
+      summary: Upgrade user to next round (admin only)
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: User upgraded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        "400":
+          description: Invalid UUID
+        "500":
+          description: Internal server error
+
+  /users/{id}/submissions:
+    get:
+      summary: Get user's submissions (admin only)
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of user's submissions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  submissions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Submission"
+        "400":
+          description: Invalid UUID
+        "500":
+          description: Internal server error
+  /dashboard:
+    get:
+      summary: Load user dashboard
+      description: >
+        Fetches the dashboard details for the authenticated user.  
+        It includes user info, submissions, current round, questions completed, and scores.
+      tags:
+        - Dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response with dashboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      userName:
+                        type: string
+                        example: John Doe
+                      email:
+                        type: string
+                        example: john@example.com
+                      currentRound:
+                        type: integer
+                        format: int8
+                        example: 2
+                      questionsCompleted0:
+                        type: integer
+                        example: 2
+                      questionsCompleted1:
+                        type: integer
+                        example: 5
+                      questionsCompleted2:
+                        type: integer
+                        example: 3
+                      questionsCompleted3:
+                        type: integer
+                        example: 1
+                      questionsNotCompleted0:
+                        type: integer
+                        example: 0
+                      questionsNotCompleted1:
+                        type: integer
+                        example: 3
+                      questionsNotCompleted2:
+                        type: integer
+                        example: 4
+                      questionsNotCompleted3:
+                        type: integer
+                        example: 2
+                      round0Score:
+                        type: integer
+                        example: 50
+                      round1Score:
+                        type: integer
+                        example: 120
+                      round2Score:
+                        type: integer
+                        example: 60
+                      round3Score:
+                        type: integer
+                        example: 20
+        "400":
+          description: Bad request (user ID not found or invalid query)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Could not get user_id
+                  error:
+                    type: string
+        "500":
+          description: Internal server error (query failure)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Could not get the required user from database
+                  error:
+                    type: string
 components:
   schemas:
     ErrorResponse:
@@ -390,7 +985,7 @@ components:
               description: Round qualified (0 or 1)
               example: 1
             score:
-              type: string
+              type: integer
               description: User score (numeric type from Postgres)
               example: 100
     Question:
@@ -443,7 +1038,43 @@ components:
         - sampleTestInput
         - sampleTestOutput
         - explanation
-
+    TestCase:
+      type: object
+      description: A test case for a question
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the test case
+        expected_output:
+          type: string
+          description: The expected output for the given input
+        memory:
+          type: number
+          format: double
+          description: Memory limit for this test case (numeric value)
+        input:
+          type: string
+          description: The input provided to the program
+        hidden:
+          type: boolean
+          description: Whether the test case is hidden from the user
+        runtime:
+          type: number
+          format: double
+          description: Runtime limit for this test case (decimal value)
+        question_id:
+          type: string
+          format: uuid
+          description: ID of the question this test case belongs to
+      required:
+        - id
+        - expected_output
+        - memory
+        - input
+        - hidden
+        - runtime
+        - question_id
     CreateQuestionParams:
       type: object
       properties:
@@ -565,3 +1196,202 @@ components:
         message:
           type: string
           example: "tokens refreshed"
+
+    TestCases:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        expected_output:
+          type: string
+        memory:
+          type: number
+        input:
+          type: string
+        hidden:
+          type: boolean
+        runtime:
+          type: number
+        question_id:
+          type: string
+          format: uuid
+      required:
+        - id
+        - expected_output
+        - memory
+        - input
+        - hidden
+        - runtime
+        - question_id
+
+    CreateTestCaseRequest:
+      type: object
+      required:
+        - expected_output
+        - memory
+        - input
+        - runtime
+        - question_id
+      properties:
+        expected_output:
+          type: string
+        memory:
+          type: number
+        input:
+          type: string
+        hidden:
+          type: boolean
+          default: false
+        runtime:
+          type: number
+        question_id:
+          type: string
+          format: uuid
+
+    UpdateTestCaseRequest:
+      type: object
+      properties:
+        expected_output:
+          type: string
+        memory:
+          type: number
+        input:
+          type: string
+        hidden:
+          type: boolean
+        runtime:
+          type: number
+        question_id:
+          type: string
+          format: uuid
+
+    SubmissionRequest:
+      type: object
+      required:
+        - source_code
+        - language_id
+        - question_id
+      properties:
+        source_code:
+          type: string
+        language_id:
+          type: integer
+          format: int32
+        question_id:
+          type: string
+          format: uuid
+
+    SubmissionResponse:
+      type: object
+      properties:
+        submission_id:
+          type: string
+          format: uuid
+
+    Judge0CallbackPayload:
+      type: object
+      properties:
+        submission_id:
+          type: string
+        token:
+          type: string
+        status:
+          type: object
+          properties:
+            id:
+              type: integer
+            description:
+              type: string
+        language:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+        stdin:
+          type: string
+        source:
+          type: string
+        output:
+          type: string
+        stderr:
+          type: string
+        compile_output:
+          type: string
+        runtime:
+          type: integer
+        memory:
+          type: integer
+        created_at:
+          type: string
+        finished_at:
+          type: string
+
+    Submission:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        question_id:
+          type: string
+          format: uuid
+        testcases_passed:
+          type: integer
+        testcases_failed:
+          type: integer
+        runtime:
+          type: number
+        submission_time:
+          type: string
+          format: date-time
+        source_code:
+          type: string
+        language_id:
+          type: integer
+        description:
+          type: string
+        memory:
+          type: number
+        user_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        reg_no:
+          type: string
+        role:
+          type: string
+        round_qualified:
+          type: integer
+        score:
+          type: number
+        name:
+          type: string
+        is_banned:
+          type: boolean
+
+    UserListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        next_cursor:
+          type: string
+          format: uuid
+          nullable: true
