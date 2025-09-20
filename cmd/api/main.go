@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/controllers"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
@@ -23,8 +22,6 @@ func main() {
 	utils.InitTokenCache()
 	utils.InitDB()
 	validator.InitValidator()
-
-	controllers.Queries = utils.Queries
 
 	// Initialize queue system
 	redisURI := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), "6379")

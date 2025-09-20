@@ -10,14 +10,14 @@ import (
 
 func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	e.GET("/ping", controllers.Ping)
+	e.PUT("/callback", func(c echo.Context) error {
+		return controllers.CallbackUrl(c, taskClient)
+	})
 	e.GET("/docs", controllers.Docs)
 	e.POST("/signup", controllers.Signup)
 	e.POST("/login", controllers.Login)
 	e.POST("/refreshToken", controllers.RefreshToken)
-	// e.POST("/callback", controllers.CallbackUrl)
-	e.POST("/callback", func(c echo.Context) error {
-		return controllers.CallbackUrl(c, taskClient)
-	})
+
 	// e.POST("/submit", controllers.SubmitCode)
 
 	// API group with JWT authentication
