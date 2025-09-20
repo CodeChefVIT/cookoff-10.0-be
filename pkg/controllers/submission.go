@@ -47,11 +47,23 @@ func SubmitCode(c echo.Context) error {
 		fmt.Println("CreateBatchSubmission error:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create batch submission"})
 	}
+
 	for _, token := range tokens {
 		if err := utils.TokenCache.Set(utils.Ctx, token, submissionID, 0).Err(); err != nil {
 			fmt.Printf("Failed to cache token %s: %v\n", token, err)
 		}
 	}
+	sub := utils.SubmissionInput{
+		ID:         submissionID,
+		QuestionID: req.QuestionID,
+		LanguageID: req.LanguageID,
+		SourceCode: req.SourceCode,
+		UserID:     req.UserID,
+	}
+	if err := utils.SaveSubmission(sub); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save submission record"})
+	}
+
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"submission_id": submissionID,
