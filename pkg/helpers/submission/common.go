@@ -69,12 +69,10 @@ func SendToJudge0(params url.Values, payload []byte) (*http.Response, error) {
 		return nil, errors.New("JUDGE0_URI not set in environment")
 	}
 
-	// Make sure baseURI doesn't have a trailing slash
 	if baseURI[len(baseURI)-1] == '/' {
 		baseURI = baseURI[:len(baseURI)-1]
 	}
 
-	// Append /submissions explicitly
 	fullURL := baseURI + "/submissions?" + params.Encode()
 
 	req, err := http.NewRequest("POST", fullURL, bytes.NewBuffer(payload))

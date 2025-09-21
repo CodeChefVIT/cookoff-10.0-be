@@ -84,7 +84,6 @@ func RunCode(c echo.Context) error {
 		}
 		defer result.Body.Close()
 
-		// DEBUG: Read and print raw response
 		bodyBytes, err := io.ReadAll(result.Body)
 		if err != nil {
 			fmt.Printf("Error reading Judge0 response body: %v\n", err)
@@ -99,7 +98,6 @@ func RunCode(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error decoding response from Judge0"})
 		}
 
-		// Decode optional fields
 		data.Stdout, _ = submissions.DecodeB64(data.Stdout)
 		data.Stderr, _ = submissions.DecodeB64(data.Stderr)
 		data.Message, _ = submissions.DecodeB64(data.Message)
