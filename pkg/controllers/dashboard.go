@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -13,15 +12,7 @@ import (
 func LoadDashboard(c echo.Context) error {
 	var dashboardData dto.DashboardResponse
 
-	userID, err := auth.GetUserID(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"status":  "Failed",
-			"message": "Could not get user_id",
-			"error":   err.Error(),
-		})
-	}
+	userID := c.Get(utils.UserContextKey).(uuid.UUID)
 
 	theUser, err := utils.Queries.GetUserById(c.Request().Context(), userID)
 	if err != nil {

@@ -5,7 +5,10 @@ import (
 	"strings"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -37,6 +40,16 @@ func AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 				"error":  "not allowed to visit",
 			})
 		}
+
+		userID, err := uuid.Parse(claims.UserID)
+		if err != nil {
+			logger.Infof("invalid user id %v", claims.UserID)
+			return c.JSON(http.StatusUnauthorized, echo.Map{
+				"status": "Unauthorized",
+				"error": "invalid user id",
+			})
+		}
+		c.Set(utils.UserContextKey, userID)
 
 		return next(c)
 	}
