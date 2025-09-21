@@ -27,6 +27,7 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	// Authenticated user routes
 	api.POST("/logout", controllers.Logout)
 	api.POST("/jakabutarja", controllers.SubmitCode)
+	api.POST("/chalakinahi", controllers.RunCode)
 
 	api.GET("/dashboard", controllers.LoadDashboard)
 
