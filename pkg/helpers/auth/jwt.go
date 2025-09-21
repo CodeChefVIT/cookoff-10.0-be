@@ -1,11 +1,13 @@
 package auth
 
 import (
+	"context"
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 var jwtSecret = []byte(utils.Config.JwtSecret)
@@ -52,4 +54,16 @@ func CreateRefreshToken(user *db.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
+}
+
+func VerifyRoundAccess(ctx context.Context, userID, questionID uuid.UUID) (bool, error) {
+	user, err := utils.Queries.GetUserById(ctx, userID)
+	if err != nil {
+		return false, err
+	}
+	question, err := utils.Queries.GetQuestion(ctx, questionID)
+	if err != nil {
+		return false, err
+	}
+	return user.RoundQualified >= question.Round, nil
 }
