@@ -59,7 +59,16 @@ func CreateRefreshToken(user *db.User) (string, error) {
 
 func GetUserID(c echo.Context) (uuid.UUID, error) {
 	user := c.Get("user").(*jwt.Token)
+
+	if user == nil {
+		return uuid.UUID{}, fmt.Errorf("JWT Token not found")
+	}
+
 	claims := user.Claims.(jwt.MapClaims)
+
+	if !user.Valid {
+		return uuid.UUID{}, fmt.Errorf("the JWT Token is invalid")
+	}
 
 	userIDStr, ok := claims["user_id"].(string)
 	if !ok {
