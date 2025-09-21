@@ -117,6 +117,7 @@ func RefreshToken(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
+		Domain:   "kabutar.codechefvit.com",
 		SameSite: http.SameSiteNoneMode,
 	})
 
@@ -127,6 +128,7 @@ func RefreshToken(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
+		Domain:   "kabutar.codechefvit.com",
 		SameSite: http.SameSiteNoneMode,
 	})
 
