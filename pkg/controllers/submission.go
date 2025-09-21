@@ -51,12 +51,15 @@ func SubmitCode(c echo.Context) error {
 	var testcases []map[string]string
 	for _, tc := range testcasesRows {
 		testcases = append(testcases, map[string]string{
-			"input":  tc.Input,
-			"output": tc.ExpectedOutput,
+			"input":  submissions.B64(tc.Input),          
+			"output": submissions.B64(tc.ExpectedOutput), 
 		})
 	}
 
-	tokens, err := submissions.CreateBatchSubmission(submissionID.String(), req.SourceCode, req.LanguageID, testcases)
+
+	encodedSourceCode := submissions.B64(req.SourceCode)
+
+	tokens, err := submissions.CreateBatchSubmission(submissionID.String(), encodedSourceCode, req.LanguageID, testcases)
 	if err != nil {
 		fmt.Println("CreateBatchSubmission error:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create batch submission"})
@@ -72,7 +75,7 @@ func SubmitCode(c echo.Context) error {
 		ID:         submissionID,
 		QuestionID: req.QuestionID,
 		LanguageID: req.LanguageID,
-		SourceCode: req.SourceCode,
+		SourceCode: req.SourceCode, 
 		UserID:     userID.String(),
 	}
 	if err := utils.SaveSubmission(sub); err != nil {
