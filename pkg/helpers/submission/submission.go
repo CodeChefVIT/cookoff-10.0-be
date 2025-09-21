@@ -67,12 +67,11 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 	if judge0URI == "" {
 		return nil, errors.New("JUDGE0_URI not set in environment")
 	}
-	// apiKey := os.Getenv("JUDGE0_API_KEY")
-	// if apiKey == "" {
-	// 	return nil, errors.New("JUDGE0_API_KEY not set in environment")
-	// }
 
-	req, err := http.NewRequest("POST", judge0URI+"/submissions/batch", bytes.NewBuffer(data))
+
+	batchURL := judge0URI + "/submissions/batch?base64_encoded=true"
+
+	req, err := http.NewRequest("POST", batchURL, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}
