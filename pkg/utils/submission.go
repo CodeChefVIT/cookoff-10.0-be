@@ -33,7 +33,7 @@ func SaveSubmission(sub SubmissionInput) error {
 		return fmt.Errorf("invalid UserID: %v", err)
 	}
 
-	status := "pending"
+	status := "pending" 
 
 	ctx := context.Background()
 	err = Queries.CreateSubmission(ctx, db.CreateSubmissionParams{

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -69,19 +68,9 @@ func GetAllQuestions(c echo.Context) error {
 }
 
 func GetQuestionsByRound(c echo.Context) error {
-
-	userID, err := auth.GetUserID(c)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"status":  "Failed",
-			"message": "Error Getting user_id",
-			"error":   err.Error(),
-		})
-	}
+	userID := c.Get(utils.UserContextKey).(uuid.UUID)
 
 	round, err := utils.Queries.GetUserRound(c.Request().Context(), userID)
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status":  "Failed",
@@ -107,7 +96,7 @@ func GetQuestionsByRound(c echo.Context) error {
 		})
 	}
 
-	result := []echo.Map{}
+	result := []map[string]any{}
 
 	for _, q := range questions {
 		testcases, err := utils.Queries.GetTestCasesByQuestion(c.Request().Context(), q.ID)
@@ -119,7 +108,7 @@ func GetQuestionsByRound(c echo.Context) error {
 				"error":       err.Error(),
 			})
 		}
-		result = append(result, echo.Map{
+		result = append(result, map[string]any{
 			"question":  q,
 			"testcases": testcases,
 		})
