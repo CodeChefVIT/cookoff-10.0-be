@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
@@ -89,14 +88,6 @@ func Login(c echo.Context) error {
 		})
 	}
 
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"status": "failed",
-			"error":  "DOMAIN set crow",
-		})
-	}
-
 	c.SetCookie(&http.Cookie{
 		Name:     "access_token",
 		Value:    accessToken,
@@ -104,7 +95,6 @@ func Login(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
-		Domain:   domain,
 		SameSite: http.SameSiteNoneMode,
 	})
 
@@ -115,7 +105,6 @@ func Login(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
-		Domain:   domain,
 		SameSite: http.SameSiteNoneMode,
 	})
 

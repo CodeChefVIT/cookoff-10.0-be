@@ -1,20 +1,27 @@
 package controllers
 
 import (
-	"context"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
 	submissions "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
+	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
-
-	//"github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
+
+type Token struct {
+	Token string `json:"token"`
+}
 
 func SubmitCode(c echo.Context) error {
 	var req dto.SubmissionRequest
@@ -42,47 +49,75 @@ func SubmitCode(c echo.Context) error {
 
 	submissionID := uuid.New()
 
-	ctx := context.Background()
-	testcasesRows, err := utils.Queries.GetTestCasesByQuestion(ctx, questionID)
+	ctx := c.Request().Context()
+
+	payload, testcase_id, err := submissions.CreateSubmission(ctx, questionID, req.LanguageID, req.SourceCode)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch testcases"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create submission"})
 	}
 
-	var testcases []map[string]string
-	for _, tc := range testcasesRows {
-		testcases = append(testcases, map[string]string{
-			"input":  submissions.B64(tc.Input),          
-			"output": submissions.B64(tc.ExpectedOutput), 
+	judge0URL, err := url.Parse(utils.Config.Judge0URI + "/submissions/batch")
+	params := url.Values{}
+	params.Add("base64_encoded", "true")
+
+	judge0URL.RawQuery = params.Encode()
+	resp, err := http.Post(judge0URL.String(), "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		logger.Errorf("Error sending request to Judge0: %v", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Error sending request",
+		})
+	}
+	defer resp.Body.Close()
+
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.Errorf("Error reading response body from Judge0: %v", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Error reading response body",
 		})
 	}
 
-
-	encodedSourceCode := submissions.B64(req.SourceCode)
-
-	tokens, err := submissions.CreateBatchSubmission(submissionID.String(), encodedSourceCode, req.LanguageID, testcases)
-	if err != nil {
-		fmt.Println("CreateBatchSubmission error:", err)
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create batch submission"})
+	if resp.StatusCode != http.StatusCreated {
+		logger.Errorf("Judge0 returned status code %d", resp.StatusCode)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Error from Judge0",
+		})
 	}
 
-	for _, token := range tokens {
-		if err := utils.TokenCache.Set(utils.Ctx, token, submissionID, 0).Err(); err != nil {
-			fmt.Printf("Failed to cache token %s: %v\n", token, err)
+	var tokens []Token
+	_ = json.Unmarshal(respBytes, &tokens)
+
+	for i, t := range tokens {
+		err := utils.TokenCache.Set(ctx, fmt.Sprintf("token:%s", t.Token), fmt.Sprintf("%s:%s", submissionID, testcase_id[i]), 0).Err()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"error": "Failed to cache token",
+			})
+		}
+
+		err = utils.TokenCache.SAdd(ctx, fmt.Sprintf("sub:%s:tokens", submissionID), t.Token).Err()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"error": "Failed to add token to set",
+			})
 		}
 	}
 
-	sub := utils.SubmissionInput{
+	err = utils.Queries.CreateSubmission(ctx, db.CreateSubmissionParams{
 		ID:         submissionID,
-		QuestionID: req.QuestionID,
-		LanguageID: req.LanguageID,
-		SourceCode: req.SourceCode, 
-		UserID:     userID.String(),
-	}
-	if err := utils.SaveSubmission(sub); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save submission record"})
+		UserID:     userID,
+		QuestionID: questionID,
+		LanguageID: int32(req.LanguageID),
+		SourceCode: req.SourceCode,
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to create batch submission in database",
+		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, echo.Map{
 		"submission_id": submissionID,
 	})
 }

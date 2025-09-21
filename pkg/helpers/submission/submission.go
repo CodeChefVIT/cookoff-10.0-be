@@ -2,6 +2,7 @@ package submissions
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,7 +10,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type SubmissionInput struct {
@@ -109,4 +112,48 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 	}
 
 	return tokens, nil
+}
+
+type Payload struct {
+	Submissions []Judge0Submission `json:"submissions"`
+}
+
+func CreateSubmission(ctx context.Context, question_id uuid.UUID, language_id int, source string) ([]byte, []uuid.UUID, error) {
+	callback_url := utils.Config.CallbackURL
+	var testcases_ids []uuid.UUID
+	testcases, err := utils.Queries.GetTestCasesByQuestion(ctx, question_id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil, fmt.Errorf("no testcases exist for this question")
+		}
+		return nil, nil, fmt.Errorf("error getting test cases for question_id %d: %v", question_id, err)
+	}
+
+	payload := Payload{
+		Submissions: make([]Judge0Submission, len(testcases)),
+	}
+
+	runtime_mut, err := RuntimeMut(language_id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for i, testcase := range testcases {
+		runtime, _ := testcase.Runtime.Float64Value()
+		testcases_ids = append(testcases_ids, testcase.ID)
+		payload.Submissions[i] = Judge0Submission{
+			SourceCode:     (source),
+			LanguageID:     language_id,
+			Stdin:          testcase.Input,
+			ExpectedOutput: testcase.ExpectedOutput,
+			Runtime:        runtime.Float64 * float64(runtime_mut),
+			Callback:       callback_url,
+		}
+	}
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error marshaling payload: %v", err)
+	}
+
+	return payloadJSON, testcases_ids, nil
 }

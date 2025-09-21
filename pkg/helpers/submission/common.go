@@ -3,10 +3,10 @@ package submissions
 import (
 	"bytes"
 	"encoding/base64"
+
 	//"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -90,7 +90,6 @@ func SendToJudge0(params url.Values, payload []byte) (*http.Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request to Judge0: %w", err)
 	}
-	
 
 	return resp, nil
 }
