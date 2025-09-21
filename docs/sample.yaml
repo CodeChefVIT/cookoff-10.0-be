@@ -610,7 +610,7 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
-
+  
   /callback:
     post:
       summary: Judge0 callback endpoint (internal use only)
@@ -658,6 +658,102 @@ paths:
                 $ref: "#/components/schemas/UserListResponse"
         "500":
           description: Internal server error
+          
+  /chalakinahi:
+    post:
+      summary: Run code against test cases without submission
+      tags:
+        - Submissions
+      description: Executes code against question test cases and returns immediate results
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionRequest"
+      responses:
+        "200":
+          description: Code executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - result
+                  - no_testcases_passed
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - token
+                        - status
+                        - stdout
+                        - time
+                        - memory
+                      properties:
+                        token:
+                          type: string
+                          format: uuid
+                        status:
+                          type: object
+                          required:
+                            - id
+                            - description
+                          properties:
+                            id:
+                              type: integer
+                              minimum: 1
+                            description:
+                              type: string
+                        stdout:
+                          type: string
+                        time:
+                          type: string
+                          pattern: "^\\d+\\.\\d+$"
+                        memory:
+                          type: integer
+                          minimum: 0
+                        stderr:
+                          type: string
+                        message:
+                          type: string
+                        language:
+                          type: string
+                  no_testcases_passed:
+                    type: integer
+                    minimum: 0
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Unauthorized - missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse" 
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - error
+                properties:
+                  error:
+                    type: string        
 
   /users/{id}/ban:
     post:
@@ -1395,3 +1491,4 @@ components:
           type: string
           format: uuid
           nullable: true
+ 
