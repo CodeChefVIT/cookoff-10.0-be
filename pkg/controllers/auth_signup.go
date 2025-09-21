@@ -53,7 +53,7 @@ func Signup(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error":  "some error occurred while generation",
+			"error":  "some error occurred",
 		})
 	}
 
@@ -61,7 +61,7 @@ func Signup(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error":  "some error occurred wihle uuid generation",
+			"error":  "some error occurred",
 		})
 	}
 
@@ -84,7 +84,7 @@ func Signup(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
-			"error":  "some error occurred while creating user",
+			"error":  "some error occurred",
 		})
 	}
 
