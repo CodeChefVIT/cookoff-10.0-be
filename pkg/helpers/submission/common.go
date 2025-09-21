@@ -90,12 +90,7 @@ func SendToJudge0(params url.Values, payload []byte) (*http.Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request to Judge0: %w", err)
 	}
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		fmt.Printf("Judge0 returned status %d: %s\n", resp.StatusCode, string(body))
-		return nil, fmt.Errorf("Judge0 returned non-200 status: %d", resp.StatusCode)
-	}
+	
 
 	return resp, nil
 }
