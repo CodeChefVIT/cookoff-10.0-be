@@ -28,6 +28,7 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	api.POST("/logout", controllers.Logout)
 	api.POST("/jakabutarja", controllers.SubmitCode)
 	api.POST("/chalakinahi", controllers.RunCode)
+	api.GET("/result/:submission_id", controllers.GetResult)
 
 	api.GET("/dashboard", controllers.LoadDashboard)
 
