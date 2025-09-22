@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
@@ -111,22 +110,13 @@ func RefreshToken(c echo.Context) error {
 		})
 	}
 
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"status": "failed",
-			"error":  "DOMAIN set crow",
-		})
-	}
-
 	c.SetCookie(&http.Cookie{
-		Name:     "jwt",
+		Name:     "access_token",
 		Value:    accessToken,
 		MaxAge:   60,
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
-		Domain:   domain,
 		SameSite: http.SameSiteNoneMode,
 	})
 
@@ -137,7 +127,6 @@ func RefreshToken(c echo.Context) error {
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
-		Domain:   domain,
 		SameSite: http.SameSiteNoneMode,
 	})
 
