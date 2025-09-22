@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/big"
 	"strconv"
-	"strings"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
@@ -18,10 +17,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const (
+	TypeProcessSubmission = "submission:process"
+	SubmissionDoneStatus  = "DONE"
+)
+
 // ProcessJudge0CallbackTask simply logs the received Judge0 callback
 func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 	var data dto.Judge0CallbackPayload
-	log.Printf("Received Judge0 callback task: %s", string(t.Payload()))
 
 	logger.Infof("Processing task: %v", t.Type)
 	logger.Infof("Payload: %v", string(t.Payload()))
@@ -37,15 +40,11 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	subID, err := utils.GetSubmissionIDByToken(data.Token)
+	value, testcase, err := utils.GetSubmissionIDByToken(ctx, data.Token)
 	if err != nil {
 		log.Println("Error getting submission ID from token: ", err)
 		return err
 	}
-
-	temp := strings.Split(subID, ":")
-	value := temp[0]
-	testcase := temp[1]
 
 	idUUID, err := uuid.Parse(value)
 	if err != nil {
@@ -148,7 +147,7 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	if err := utils.DeleteTokensBySubmissionID(subID); err != nil {
+	if err := utils.DeleteToken(ctx, data.Token); err != nil {
 		log.Println("Error deleting token: ", err)
 		return err
 	}

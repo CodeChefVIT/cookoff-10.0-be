@@ -14,7 +14,7 @@ import (
 const TypeProcessSubmission = "submission:process"
 
 func CallbackUrl(c echo.Context, taskClient *asynq.Client) error {
-	logger.Infof("Judge0 Callback JSON: %s\n")
+	logger.Infof("Judge0 Callback hit\n")
 
 	var callbackPayload dto.Judge0CallbackPayload
 	if err := c.Bind(&callbackPayload); err != nil {
