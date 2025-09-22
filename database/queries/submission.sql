@@ -16,8 +16,6 @@ INSERT INTO submissions (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 );
 
-
-
 -- name: GetSubmissionByID :one
 SELECT
     id,
@@ -35,7 +33,7 @@ SELECT
 FROM submissions
 WHERE id = $1;
 
--- name: UpdateSubmission :exec
+-- name: UpdateSubmissionByID :exec
 UPDATE submissions
 SET 
     runtime = $1, 
@@ -45,7 +43,7 @@ SET
     testcases_failed = $5
 WHERE id = $6;
 
--- name: UpdateScore :exec
+-- name: UpdateUserScoreBySubmissionID :exec
 WITH best_submissions AS (
     SELECT 
         s.user_id AS user_id,
@@ -63,3 +61,28 @@ SET score = (
     FROM best_submissions
 )
 WHERE users.id = (select user_id from submissions s where s.id = $1);
+
+-- name: GetSubmissionStatusByID :one
+SELECT status
+FROM submissions
+WHERE id = $1;
+
+-- name: GetSubmissionResultsBySubmissionIDQuery :many
+SELECT
+    id,
+    submission_id,
+    testcase_id,
+    runtime,
+    memory,
+    status,
+    description
+FROM submission_results
+WHERE submission_id = $1;
+
+-- name: GetStatsForFinalSubEntryBySubmissionID :many
+SELECT
+    runtime,
+    memory,
+    status
+FROM submission_results
+WHERE submission_id = $1;
