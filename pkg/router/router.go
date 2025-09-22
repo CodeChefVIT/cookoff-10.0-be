@@ -22,7 +22,9 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 
 	// API group with JWT authentication
 	api := e.Group("")
-	api.Use(middlewares.VerifyJWTMiddleware)
+
+	// Do NOT change the order of middlewares here as the userid is set in context first and then bancheck is performed
+	api.Use(middlewares.VerifyJWTMiddleware, middlewares.BanCheckUser)
 
 	// Authenticated user routes
 	api.POST("/logout", controllers.Logout)
@@ -49,7 +51,9 @@ func questionRoutes(api *echo.Group) {
 
 	// Admin only question routes
 	adminQuestions := questions.Group("")
-	adminQuestions.Use(middlewares.AdminOnly)
+
+	// Do NOT change the order of middlewares here as the userid is set in context first and then bancheck is performed
+	adminQuestions.Use(middlewares.AdminOnly, middlewares.BanCheckUser)
 	{
 		adminQuestions.DELETE("/:id", controllers.DeleteQuestion)
 		adminQuestions.POST("/:id/bounty/activate", controllers.ActivateBounty)

@@ -57,6 +57,14 @@ func SubmitCode(c echo.Context) error {
 	}
 
 	judge0URL, err := url.Parse(utils.Config.Judge0URI + "/submissions/batch")
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "Submission failed",
+			"error":  "Error parsing judge0 url",
+		})
+	}
+
 	params := url.Values{}
 	params.Add("base64_encoded", "true")
 
