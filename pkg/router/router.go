@@ -17,6 +17,7 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	e.POST("/signup", controllers.Signup)
 	e.POST("/login", controllers.Login)
 	e.POST("/refreshToken", controllers.RefreshToken)
+	
 
 	// e.POST("/submit", controllers.SubmitCode)
 
@@ -31,7 +32,7 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	api.POST("/jakabutarja", controllers.SubmitCode)
 	api.POST("/chalakinahi", controllers.RunCode)
 	api.GET("/result/:submission_id", controllers.GetResult)
-
+	api.POST("/runcustom", controllers.RunCustom)
 	api.GET("/dashboard", controllers.LoadDashboard)
 
 	// Question routes
