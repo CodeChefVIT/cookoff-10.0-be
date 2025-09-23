@@ -11,7 +11,8 @@ import (
 )
 
 func CreateQuestion(c echo.Context) error {
-	var req db.CreateQuestionParams
+
+	var req dto.CreateQuestion
 	err := c.Bind(&req)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
@@ -19,8 +20,21 @@ func CreateQuestion(c echo.Context) error {
 			"error":  err.Error(),
 		})
 	}
-	req.ID = uuid.New()
-	if err := utils.Queries.CreateQuestion(c.Request().Context(), req); err != nil {
+	if err := utils.Queries.CreateQuestion(c.Request().Context(), db.CreateQuestionParams{
+		ID:               uuid.New(),
+		Description:      req.Description,
+		Title:            req.Title,
+		Qtype:            req.Qtype,
+		Isbountyactive:   req.Isbountyactive,
+		InputFormat:      req.InputFormat,
+		Points:           req.Points,
+		Round:            req.Round,
+		Constraints:      req.Constraints,
+		OutputFormat:     req.OutputFormat,
+		SampleTestInput:  req.SampleTestInput,
+		SampleTestOutput: req.SampleTestOutput,
+		Explanation:      req.Explanation,
+	}); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "Could not create question",
 			"error":  err.Error(),
