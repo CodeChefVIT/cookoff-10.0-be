@@ -91,7 +91,7 @@ func Login(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "access_token",
 		Value:    accessToken,
-		MaxAge:   60,
+		MaxAge:   3600,
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
@@ -101,7 +101,7 @@ func Login(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "refresh_token",
 		Value:    refreshToken,
-		MaxAge:   5400,
+		MaxAge:   7200,
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",
