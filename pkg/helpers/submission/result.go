@@ -29,6 +29,7 @@ type TCResult struct {
     Memory      float64 `json:"memory"`
     Status      string  `json:"status"`
     Description string  `json:"description"`
+    ExpectedOutput string  `json:"expected_output"`
 }
 
 func CheckStatus(ctx context.Context, subID uuid.UUID) (bool, error) {
