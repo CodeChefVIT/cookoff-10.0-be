@@ -45,8 +45,6 @@ func questionRoutes(api *echo.Group) {
 
 	questions.GET("", controllers.GetAllQuestions)
 	questions.GET("/:id", controllers.GetQuestion)
-	questions.POST("", controllers.CreateQuestion)
-	questions.PUT("/:id", controllers.UpdateQuestion)
 	questions.GET("/round", controllers.GetQuestionsByRound)
 
 	// Admin only question routes
@@ -55,6 +53,8 @@ func questionRoutes(api *echo.Group) {
 	// Do NOT change the order of middlewares here as the userid is set in context first and then bancheck is performed
 	adminQuestions.Use(middlewares.AdminOnly, middlewares.BanCheckUser)
 	{
+		adminQuestions.POST("", controllers.CreateQuestion)
+		adminQuestions.PUT("/:id", controllers.UpdateQuestion)
 		adminQuestions.DELETE("/:id", controllers.DeleteQuestion)
 		adminQuestions.POST("/:id/bounty/activate", controllers.ActivateBounty)
 		adminQuestions.POST("/:id/bounty/deactivate", controllers.DeactivateBounty)
