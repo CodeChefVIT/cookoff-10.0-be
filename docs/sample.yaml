@@ -4,7 +4,7 @@ info:
   description: API Documentation
   version: 1.0.0
 servers:
-  - url: https://kabutar.codechefvit.com
+  - url: http://127.0.0.1:8080
     description: Local server
 paths:
   /signup:
@@ -157,7 +157,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Question"
+              $ref: "#/components/schemas/CreateQuestionParams"
       responses:
         "201":
           description: Question created successfully
@@ -1285,9 +1285,6 @@ components:
     CreateQuestionParams:
       type: object
       properties:
-        id:
-          type: string
-          format: uuid
         description:
           type: string
         title:

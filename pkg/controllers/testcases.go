@@ -29,29 +29,13 @@ func CreateTestCase(c echo.Context) error {
 
 	questionID, _ := uuid.Parse(req.QuestionID)
 
-	memory, err := utils.InterfaceToNumeric(req.Memory)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"status": "Invalid memory value",
-			"error":  err.Error(),
-		})
-	}
-
-	runtime, err := utils.InterfaceToNumeric(req.Runtime)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, echo.Map{
-			"status": "Invalid runtime value",
-			"error":  err.Error(),
-		})
-	}
-
 	testCase, err := utils.Queries.CreateTestCase(c.Request().Context(), db.CreateTestCaseParams{
 		ID:             uuid.New(),
 		ExpectedOutput: req.ExpectedOutput,
-		Memory:         memory,
+		Memory:         req.Memory,
 		Input:          req.Input,
 		Hidden:         req.Hidden,
-		Runtime:        runtime,
+		Runtime:        req.Runtime,
 		QuestionID:     questionID,
 	})
 
@@ -139,7 +123,7 @@ func UpdateTestCase(c echo.Context) error {
 	}
 
 	memory := existing.Memory
-	if req.Memory != nil {
+	if !req.Memory.Valid {
 		memory, err = utils.InterfaceToNumeric(req.Memory)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
@@ -150,7 +134,7 @@ func UpdateTestCase(c echo.Context) error {
 	}
 
 	runtime := existing.Runtime
-	if req.Runtime != nil {
+	if !req.Runtime.Valid {
 		runtime, err = utils.InterfaceToNumeric(req.Runtime)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
