@@ -27,16 +27,17 @@ SELECT * FROM questions ORDER BY id;
 -- name: UpdateQuestion :exec
 UPDATE questions
 SET description = $2,
-    qType = $3,
-    isBountyActive = $4,
-    input_format = $5,
-    points = $6,
-    round = $7,
-    constraints = $8,
-    output_format = $9,
-    sample_test_input = $10,
-    sample_test_output = $11,
-    explanation = $12
+    title = $3,
+    qType = $4,
+    isBountyActive = $5,
+    input_format = $6,
+    points = $7,
+    round = $8,
+    constraints = $9,
+    output_format = $10,
+    sample_test_input = $11,
+    sample_test_output = $12,
+    explanation = $13
 WHERE id = $1;
 
 -- name: UpdateQuestionBountyActive :exec
