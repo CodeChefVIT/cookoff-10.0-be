@@ -588,7 +588,7 @@ paths:
         "500":
           description: Internal server error
 
-  /jakabutarja:
+  /submit:
     post:
       summary: Submit code for evaluation
       tags:
@@ -610,6 +610,56 @@ paths:
           description: Invalid request
         "500":
           description: Internal server error
+
+  /runcustom:
+    post:
+      summary: Run custom code
+      description: >
+        Executes custom code with provided input using Judge0.
+        This endpoint runs code directly without submitting it for evaluation against test cases.
+      tags:
+        - Submissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomSubmissionRequest"
+      responses:
+        "200":
+          description: Code executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomCodeResponse"
+        "400":
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid request payload
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    examples:
+                      marshal_error:
+                        value: Error marshaling payload
+                      judge_error:
+                        value: Error sending request to Judge0
+                      read_error:
+                        value: Failed to read Judge0 response
+                      decode_error:
+                        value: Error decoding response from Judge0
   
   /callback:
     post:
@@ -659,7 +709,7 @@ paths:
         "500":
           description: Internal server error
           
-  /chalakinahi:
+  /runcode:
     post:
       summary: Run code against test cases without submission
       tags:
@@ -783,6 +833,67 @@ paths:
           description: Invalid UUID
         "500":
           description: Internal server error
+
+  /result/{submission_id}:
+    get:
+      summary: Get submission result
+      description: >
+        Retrieves the result of a submission by ID. If the submission is still being processed,
+        the endpoint polls every 5 seconds until completion or timeout (2 minutes).
+        Returns detailed results including testcase outcomes.
+      tags:
+        - Submissions
+      parameters:
+        - name: submission_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: UUID of the submission to get results for
+      responses:
+        "200":
+          description: Submission result retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResult"
+        "400":
+          description: Invalid UUID format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid UUID format
+        "408":
+          description: Request timeout - submission not processed within 2 minutes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Submission not processed
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    examples:
+                      status_error:
+                        value: Internal server error while getting status
+                      result_error:
+                        value: Internal server error while getting submission result
+                      testcase_error:
+                        value: Failed to fetch testcases
 
   /users/{id}/unban:
     post:
@@ -1491,4 +1602,139 @@ components:
           type: string
           format: uuid
           nullable: true
+    
+    SubmissionResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Submission ID
+        question_id:
+          type: string
+          format: uuid
+          description: Question ID this submission belongs to
+        passed:
+          type: integer
+          description: Number of test cases passed
+        failed:
+          type: integer
+          description: Number of test cases failed
+        runtime:
+          type: number
+          format: double
+          description: Total runtime for the submission
+        memory:
+          type: number
+          format: double
+          description: Memory used by the submission
+        submission_time:
+          type: string
+          description: Timestamp when the submission was made
+        description:
+          type: string
+          description: Description or status of the submission
+        testcases:
+          type: array
+          items:
+            $ref: "#/components/schemas/TestCaseResult"
+      required:
+        - id
+        - question_id
+        - passed
+        - failed
+        - runtime
+        - memory
+        - submission_time
+        - description
+        - testcases
+
+    TestCaseResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Test case ID
+        runtime:
+          type: number
+          format: double
+          description: Runtime for this specific test case
+        memory:
+          type: number
+          format: double
+          description: Memory used for this test case
+        status:
+          type: string
+          description: Status of the test case execution
+        description:
+          type: string
+          description: Description of the test case result
+        expected_output:
+          type: string
+          description: Expected output for this test case
+      required:
+        - id
+        - runtime
+        - memory
+        - status
+        - description
+        - expected_output
+
+    CustomSubmissionRequest:
+      type: object
+      required:
+        - source_code
+        - language_id
+        - input
+      properties:
+        source_code:
+          type: string
+          description: The source code to execute
+        language_id:
+          type: integer
+          format: int32
+          description: Judge0 language ID
+        input:
+          type: string
+          description: Input data for the program
+
+    CustomCodeResponse:
+      type: object
+      properties:
+        result:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Judge0 execution token
+            status:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Status ID from Judge0
+                description:
+                  type: string
+                  description: Status description
+            stdout:
+              type: string
+              description: Standard output from program execution
+            stderr:
+              type: string
+              description: Standard error from program execution
+            message:
+              type: string
+              description: Any additional messages from Judge0
+            time:
+              type: string
+              description: Execution time
+            memory:
+              type: integer
+              description: Memory usage in KB
+            language:
+              type: string
+              description: Programming language used
+      required:
+        - result
  
