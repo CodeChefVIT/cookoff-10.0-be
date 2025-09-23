@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -129,15 +130,28 @@ func UpdateQuestion(c echo.Context) error {
 			"error":  "UUID GALAT HAI BHAI",
 		})
 	}
-	var req db.UpdateQuestionParams
+	var req dto.Question
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"status": "Could not update question",
 			"error":  err.Error(),
 		})
 	}
-	req.ID = id
-	if err := utils.Queries.UpdateQuestion(c.Request().Context(), req); err != nil {
+	if err := utils.Queries.UpdateQuestion(c.Request().Context(), db.UpdateQuestionParams{
+		Description:      req.Description,
+		Title:            req.Title,
+		Qtype:            req.Qtype,
+		Isbountyactive:   req.Isbountyactive,
+		InputFormat:      req.InputFormat,
+		Points:           req.Points,
+		Round:            req.Round,
+		Constraints:      req.Constraints,
+		OutputFormat:     req.OutputFormat,
+		SampleTestInput:  req.SampleTestInput,
+		SampleTestOutput: req.SampleTestOutput,
+		Explanation:      req.Explanation,
+		ID:               id,
+	}); err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "Could not update question",
 			"error":  err.Error(),
