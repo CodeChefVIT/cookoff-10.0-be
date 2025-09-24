@@ -20,6 +20,7 @@ type cfg struct {
 	SecretKey        string `env:"SECRET_KEY,notEmpty"`
 	CallbackURL      string `env:"CALLBACK_URL,notEmpty"`
 	Judge0URI        string `env:"JUDGE0_URI,notEmpty"`
+	CookieSecure     bool   `env:"SECURE" envDefault:"false"`
 }
 
 var Config cfg

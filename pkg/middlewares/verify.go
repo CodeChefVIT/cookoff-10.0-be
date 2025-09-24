@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
@@ -42,11 +43,14 @@ func VerifyJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			logger.Infof("invalid user id %v", claims.UserID)
 			return c.JSON(http.StatusUnauthorized, echo.Map{
 				"status": "Unauthorized",
-				"error": "invalid user id",
+				"error":  "invalid user id",
 			})
 		}
 
 		c.Set(utils.UserContextKey, userID)
+
+		role := strings.ToLower(claims.Role)
+		c.Set(utils.UserRoleKey, role)
 
 		return next(c)
 	}
