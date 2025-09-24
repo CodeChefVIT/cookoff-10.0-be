@@ -1041,13 +1041,13 @@ paths:
                         type: string
                       email:
                         type: string
-                      questionsCompleted:
+                      questions_completed:
                         type: int32[4]
-                      questionsNotCompleted:
+                      questions_not_completed:
                         type: int32[4]
-                      roundScores:
+                      round_scores:
                         type: int32[4]
-                      currentRound:
+                      current_round:
                         type: int8
         "400":
           description: Bad request (user ID not found or invalid query)
