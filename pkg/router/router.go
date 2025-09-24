@@ -17,7 +17,6 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	e.POST("/signup", controllers.Signup)
 	e.POST("/login", controllers.Login)
 	e.POST("/refreshToken", controllers.RefreshToken)
-	
 
 	// e.POST("/submit", controllers.SubmitCode)
 
@@ -40,6 +39,8 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 
 	// Admin routes
 	adminRoutes(api)
+
+	timerRoutes(api)
 }
 
 func questionRoutes(api *echo.Group) {
@@ -99,4 +100,12 @@ func adminRoutes(api *echo.Group) {
 
 	// Leaderboard
 	admin.GET("/leaderboard", controllers.GetLeaderboard)
+}
+
+func timerRoutes(api *echo.Group) {
+	time := api.Group("timer")
+
+	time.GET("/getTime/:id", controllers.GetTime)
+	time.POST("/setTime", controllers.SetTime)
+	time.POST("/updateTime", controllers.UpdateTime)
 }
