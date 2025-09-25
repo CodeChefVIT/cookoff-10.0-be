@@ -56,40 +56,91 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		log.Fatalf("Error parsing UUID: %v", err)
 	}
 
-	var status string
 	switch data.Status.ID {
 	case "1":
-		status = "In Queue"
-	case "2":
-		status = "Processing"
-	case "3":
-		status = "success"
-	case "4":
-		status = "wrong answer"
-	case "5":
-		status = "Time Limit Exceeded"
-	case "6":
-		status = "Compilation error"
-	case "7", "8", "9", "10", "11", "12":
-		status = "Runtime error"
-	case "13":
-		status = "Internal Error"
-	case "14":
-		status = "Exec Format Error"
-	}
-
-	if status != "" {
 		err = handleCompilationError(
 			ctx,
 			idUUID,
 			data,
 			int(timeValue*1000),
 			testidUUID,
-			status,
+			"In Queue",
 		)
-		if err != nil {
-			return err
-		}
+	case "2":
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"Processing",
+		)
+	case "3":
+		// testcasesPassed++
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"success")
+	case "4":
+		// testcasesFailed++
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"wrong answer",
+		)
+	case "5":
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"Time Limit Exceeded",
+		)
+	case "6":
+		// testcasesFailed++
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"Compilation error",
+		)
+	case "7", "8", "9", "10", "11", "12":
+		// testcasesFailed++
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"Runtime error",
+		)
+	case "13":
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"Internal Error",
+		)
+	case "14":
+		err = handleCompilationError(
+			ctx,
+			idUUID,
+			data,
+			int(timeValue*1000),
+			testidUUID,
+			"Exec Format Error",
+		)
 	}
 
 	if err != nil {
