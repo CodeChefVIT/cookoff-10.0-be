@@ -30,10 +30,10 @@ RETURNING id, expected_output, memory, input, hidden, runtime, question_id
 type CreateTestCaseParams struct {
 	ID             uuid.UUID
 	ExpectedOutput string
-	Memory         pgtype.Numeric
+	Memory         string
 	Input          string
 	Hidden         bool
-	Runtime        pgtype.Numeric
+	Runtime        string
 	QuestionID     uuid.UUID
 }
 
