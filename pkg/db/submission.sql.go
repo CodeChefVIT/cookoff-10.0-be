@@ -82,39 +82,24 @@ FROM submissions
 WHERE id = $1
 `
 
-type GetSubmissionByIDRow struct {
-	ID              uuid.UUID
-	QuestionID      uuid.UUID
-	LanguageID      int32
-	SourceCode      string
-	TestcasesPassed pgtype.Int4
-	TestcasesFailed pgtype.Int4
-	Runtime         pgtype.Numeric
-	Memory          pgtype.Numeric
-	Status          *string
-	SubmissionTime  pgtype.Timestamp
-	Description     *string
-	UserID          uuid.UUID
-}
-
-func (q *Queries) GetSubmissionByID(ctx context.Context, id uuid.UUID) (GetSubmissionByIDRow, error) {
+func (q *Queries) GetSubmissionByID(ctx context.Context, id uuid.UUID) (Submission, error) {
 	row := q.db.QueryRow(ctx, getSubmissionByID, id)
-	var i GetSubmissionByIDRow
+	var s Submission
 	err := row.Scan(
-		&i.ID,
-		&i.QuestionID,
-		&i.LanguageID,
-		&i.SourceCode,
-		&i.TestcasesPassed,
-		&i.TestcasesFailed,
-		&i.Runtime,
-		&i.Memory,
-		&i.Status,
-		&i.SubmissionTime,
-		&i.Description,
-		&i.UserID,
+		&s.ID,
+		&s.QuestionID,
+		&s.LanguageID,
+		&s.SourceCode,
+		&s.TestcasesPassed,
+		&s.TestcasesFailed,
+		&s.Runtime,
+		&s.Memory,
+		&s.Status,
+		&s.SubmissionTime,
+		&s.Description,
+		&s.UserID,
 	)
-	return i, err
+	return s, err
 }
 
 const updateScore = `-- name: UpdateScore :exec
@@ -172,4 +157,113 @@ func (q *Queries) UpdateSubmission(ctx context.Context, arg UpdateSubmissionPara
 		arg.ID,
 	)
 	return err
+}
+
+const getAllSubmissions = `-- name: GetAllSubmissions :many
+SELECT
+    id,
+    question_id,
+    language_id,
+    source_code,
+    testcases_passed,
+    testcases_failed,
+    runtime,
+    memory,
+    status,
+    submission_time,
+    description,
+    user_id
+FROM submissions
+ORDER BY submission_time DESC
+`
+
+func (q *Queries) GetAllSubmissions(ctx context.Context) ([]Submission, error) {
+	rows, err := q.db.Query(ctx, getAllSubmissions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []Submission
+	for rows.Next() {
+		var s Submission
+		if err := rows.Scan(
+			&s.ID,
+			&s.QuestionID,
+			&s.LanguageID,
+			&s.SourceCode,
+			&s.TestcasesPassed,
+			&s.TestcasesFailed,
+			&s.Runtime,
+			&s.Memory,
+			&s.Status,
+			&s.SubmissionTime,
+			&s.Description,
+			&s.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+const getSubmissionsByUserID = `-- name: GetSubmissionsByUserID :many
+SELECT
+    id,
+    question_id,
+    language_id,
+    source_code,
+    testcases_passed,
+    testcases_failed,
+    runtime,
+    memory,
+    status,
+    submission_time,
+    description,
+    user_id
+FROM submissions
+WHERE user_id = $1
+ORDER BY submission_time DESC
+`
+
+func (q *Queries) GetSubmissionsByUserID(ctx context.Context, userID uuid.UUID) ([]Submission, error) {
+	rows, err := q.db.Query(ctx, getSubmissionsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []Submission
+	for rows.Next() {
+		var s Submission
+		if err := rows.Scan(
+			&s.ID,
+			&s.QuestionID,
+			&s.LanguageID,
+			&s.SourceCode,
+			&s.TestcasesPassed,
+			&s.TestcasesFailed,
+			&s.Runtime,
+			&s.Memory,
+			&s.Status,
+			&s.SubmissionTime,
+			&s.Description,
+			&s.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }

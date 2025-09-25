@@ -23,6 +23,18 @@ type Token struct {
 	Token string `json:"token"`
 }
 
+// UserSubmissionsResponse defines the response structure
+type UserSubmissionsResponse struct {
+	User        db.User       `json:"user"`
+	Submissions []SubmissionWithResults `json:"submissions"`
+}
+
+// SubmissionWithResults contains submission and its results
+type SubmissionWithResults struct {
+	Submission db.Submission        `json:"submission"`
+	Results    []db.SubmissionResult `json:"results"`
+}
+
 func SubmitCode(c echo.Context) error {
 	var req dto.SubmissionRequest
 	if err := c.Bind(&req); err != nil {
@@ -129,3 +141,56 @@ func SubmitCode(c echo.Context) error {
 		"submission_id": submissionID,
 	})
 }
+
+// GetUserSubmissions fetches all submissions of a user with their results
+func GetUserSubmissions(c echo.Context) error {
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"error": "Invalid user ID",
+		})
+	}
+
+	// Fetch user info
+	user, err := utils.Queries.GetUserById(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to fetch user",
+		})
+	}
+
+	// Fetch submissions for this user
+	subs, err := utils.Queries.GetSubmissionsByUserID(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to fetch submissions",
+		})
+	}
+
+	var submissionsWithResults []SubmissionWithResults
+
+	// Loop through each submission and fetch results
+	for _, sub := range subs {
+		results, err := utils.Queries.GetSubmissionResultsBySubmissionID(c.Request().Context(), sub.ID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"error": fmt.Sprintf("Failed to fetch results for submission %s", sub.ID),
+			})
+		}
+
+		submissionsWithResults = append(submissionsWithResults, SubmissionWithResults{
+			Submission: sub,
+			Results:    results,
+		})
+	}
+
+	// Build response
+	response := UserSubmissionsResponse{
+		User:        user,
+		Submissions: submissionsWithResults,
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+

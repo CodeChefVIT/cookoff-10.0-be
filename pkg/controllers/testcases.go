@@ -8,6 +8,7 @@ import (
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,18 +28,25 @@ func CreateTestCase(c echo.Context) error {
 		})
 	}
 
-	questionID, _ := uuid.Parse(req.QuestionID)
-
-	memory, err := utils.InterfaceToNumeric(req.Memory)
+	questionID, err := uuid.Parse(req.QuestionID)
 	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"status": "Invalid question ID",
+			"error":  err.Error(),
+		})
+	}
+
+	
+	var memory pgtype.Numeric
+	if err := memory.Scan(req.Memory); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"status": "Invalid memory value",
 			"error":  err.Error(),
 		})
 	}
 
-	runtime, err := utils.InterfaceToNumeric(req.Runtime)
-	if err != nil {
+	var runtime pgtype.Numeric
+	if err := runtime.Scan(req.Runtime); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{
 			"status": "Invalid runtime value",
 			"error":  err.Error(),
@@ -54,7 +62,6 @@ func CreateTestCase(c echo.Context) error {
 		Runtime:        runtime,
 		QuestionID:     questionID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "Failed to create test case",
@@ -116,14 +123,19 @@ func UpdateTestCase(c echo.Context) error {
 		})
 	}
 
-	if req.ExpectedOutput == "" {
-		req.ExpectedOutput = existing.ExpectedOutput
+	expectedOutput := existing.ExpectedOutput
+	if req.ExpectedOutput != "" {
+		expectedOutput = req.ExpectedOutput
 	}
-	if req.Input == "" {
-		req.Input = existing.Input
+
+	input := existing.Input
+	if req.Input != "" {
+		input = req.Input
 	}
-	if req.Hidden == nil {
-		req.Hidden = &existing.Hidden
+
+	hidden := existing.Hidden
+	if req.Hidden != nil {
+		hidden = *req.Hidden
 	}
 
 	questionID := existing.QuestionID
@@ -139,37 +151,38 @@ func UpdateTestCase(c echo.Context) error {
 	}
 
 	memory := existing.Memory
-	if req.Memory != nil {
-		memory, err = utils.InterfaceToNumeric(req.Memory)
-		if err != nil {
+	if req.Memory != "" {
+		var numeric pgtype.Numeric
+		if err := numeric.Scan(req.Memory); err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"status": "Invalid memory value",
 				"error":  err.Error(),
 			})
 		}
+		memory = numeric
 	}
 
 	runtime := existing.Runtime
-	if req.Runtime != nil {
-		runtime, err = utils.InterfaceToNumeric(req.Runtime)
-		if err != nil {
+	if req.Runtime != "" {
+		var numeric pgtype.Numeric
+		if err := numeric.Scan(req.Runtime); err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"status": "Invalid runtime value",
 				"error":  err.Error(),
 			})
 		}
+		runtime = numeric
 	}
 
 	updated, err := utils.Queries.UpdateTestCase(c.Request().Context(), db.UpdateTestCaseParams{
 		ID:             id,
-		ExpectedOutput: req.ExpectedOutput,
+		ExpectedOutput: expectedOutput,
 		Memory:         memory,
-		Input:          req.Input,
-		Hidden:         *req.Hidden,
+		Input:          input,
+		Hidden:         hidden,
 		Runtime:        runtime,
 		QuestionID:     questionID,
 	})
-
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "Failed to update test case",

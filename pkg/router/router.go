@@ -93,7 +93,9 @@ func adminRoutes(api *echo.Group) {
 	admin.POST("/users/:id/ban", controllers.BanUser)
 	admin.POST("/users/:id/unban", controllers.UnbanUser)
 	admin.POST("/users/:id/upgrade", controllers.UpgradeUserToRound)
-	admin.GET("/users/:id/submissions", controllers.GetSubmissionByUser)
+
+	// Submissions management routes
+	admin.GET("/users/:id/submissions", controllers.GetUserSubmissions)
 
 	// Leaderboard
 	admin.GET("/leaderboard", controllers.GetLeaderboard)
