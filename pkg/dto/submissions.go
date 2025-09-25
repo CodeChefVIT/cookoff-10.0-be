@@ -12,3 +12,8 @@ type SubmissionPayload struct {
 	Output     string  `json:"expected_output"`
 	Runtime    float64 `json:"cpu_time_limit"`
 }
+type CustomSubmissionRequest struct {
+	SourceCode string `json:"source_code" validate:"required"`
+	LanguageID int    `json:"language_id" validate:"required"`
+	Input      string `json:"input"`
+}

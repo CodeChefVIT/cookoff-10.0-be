@@ -56,10 +56,10 @@ func CreateTestCase(c echo.Context) error {
 	testCase, err := utils.Queries.CreateTestCase(c.Request().Context(), db.CreateTestCaseParams{
 		ID:             uuid.New(),
 		ExpectedOutput: req.ExpectedOutput,
-		Memory:         memory,
+		Memory:         req.Memory,
 		Input:          req.Input,
 		Hidden:         req.Hidden,
-		Runtime:        runtime,
+		Runtime:        req.Runtime,
 		QuestionID:     questionID,
 	})
 	if err != nil {
