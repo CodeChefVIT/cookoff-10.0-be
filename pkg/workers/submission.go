@@ -56,91 +56,40 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		log.Fatalf("Error parsing UUID: %v", err)
 	}
 
+	var status string
 	switch data.Status.ID {
 	case "1":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"In Queue",
-		)
+		status = "In Queue"
 	case "2":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Processing",
-		)
+		status = "Processing"
 	case "3":
-		// testcasesPassed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"success")
+		status = "success"
 	case "4":
-		// testcasesFailed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"wrong answer",
-		)
+		status = "wrong answer"
 	case "5":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Time Limit Exceeded",
-		)
+		status = "Time Limit Exceeded"
 	case "6":
-		// testcasesFailed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Compilation error",
-		)
+		status = "Compilation error"
 	case "7", "8", "9", "10", "11", "12":
-		// testcasesFailed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Runtime error",
-		)
+		status = "Runtime error"
 	case "13":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Internal Error",
-		)
+		status = "Internal Error"
 	case "14":
+		status = "Exec Format Error"
+	}
+
+	if status != "" {
 		err = handleCompilationError(
 			ctx,
 			idUUID,
 			data,
 			int(timeValue*1000),
 			testidUUID,
-			"Exec Format Error",
+			status,
 		)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err != nil {
