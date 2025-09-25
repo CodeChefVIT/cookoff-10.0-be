@@ -19,4 +19,7 @@ func adminRoutes(api *echo.Group) {
 
 	// Leaderboard
 	admin.GET("/leaderboard", controllers.GetLeaderboard)
+
+	// Submissions
+	admin.GET("/users/:id/submissions", controllers.GetUserSubmissions)
 }
