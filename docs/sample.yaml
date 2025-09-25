@@ -1041,12 +1041,28 @@ paths:
                         type: string
                       email:
                         type: string
+                        format: email
                       questions_completed:
-                        type: int32[4]
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
                       questions_not_completed:
-                        type: int32[4]
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
                       round_scores:
-                        type: int32[4]
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
                       current_round:
                         type: int8
         "400":
