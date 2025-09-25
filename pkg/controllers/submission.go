@@ -152,7 +152,6 @@ func GetUserSubmissions(c echo.Context) error {
 		})
 	}
 
-	// Fetch user info
 	user, err := utils.Queries.GetUserById(c.Request().Context(), userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
@@ -160,7 +159,6 @@ func GetUserSubmissions(c echo.Context) error {
 		})
 	}
 
-	// Fetch submissions for this user
 	subs, err := utils.Queries.GetSubmissionsByUserID(c.Request().Context(), userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
@@ -170,7 +168,6 @@ func GetUserSubmissions(c echo.Context) error {
 
 	var submissionsWithResults []SubmissionWithResults
 
-	// Loop through each submission and fetch results
 	for _, sub := range subs {
 		results, err := utils.Queries.GetSubmissionResultsBySubmissionID(c.Request().Context(), sub.ID)
 		if err != nil {
@@ -185,7 +182,6 @@ func GetUserSubmissions(c echo.Context) error {
 		})
 	}
 
-	// Build response
 	response := UserSubmissionsResponse{
 		User:        user,
 		Submissions: submissionsWithResults,
