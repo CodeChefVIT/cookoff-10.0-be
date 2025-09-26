@@ -105,7 +105,7 @@ func adminRoutes(api *echo.Group) {
 func timerRoutes(api *echo.Group) {
 	time := api.Group("timer")
 
-	time.GET("/getTime/:id", controllers.GetTime)
+	time.GET("/getTime", controllers.GetTime)
 	time.POST("/setTime", controllers.SetTime)
 	time.POST("/updateTime", controllers.UpdateTime)
 }

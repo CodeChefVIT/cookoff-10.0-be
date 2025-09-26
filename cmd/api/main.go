@@ -22,7 +22,6 @@ func main() {
 	utils.InitTokenCache()
 	utils.InitDB()
 	validator.InitValidator()
-	utils.InitTimer()
 
 	// Initialize queue system
 	redisURI := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), "6379")

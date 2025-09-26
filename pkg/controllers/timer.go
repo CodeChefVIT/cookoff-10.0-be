@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
@@ -40,7 +41,7 @@ func GetTime(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"round_end_time": roundEndTime,
-		"server_time":    time.Now(),
+		"server_time":    time.Now().Format(time.RFC3339),
 	})
 }
 
@@ -135,6 +136,15 @@ func UpdateTime(c echo.Context) error {
 		})
 	}
 
+	err = utils.RedisClient.ExpireAt(c.Request().Context(), "current_round", updatedTime).Err()
+	if err != nil {
+		logger.Errorf("current_round TTL updation error: %v", err.Error())
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "failed",
+			"error":  "something went wrong",
+		})
+	}
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"status":  "success",
 		"message": "time updated successfully",
@@ -142,7 +152,7 @@ func UpdateTime(c echo.Context) error {
 }
 
 func StartRound(c echo.Context) error {
-	newRound, err := utils.RedisClient.Incr(c.Request().Context(), "current_round").Result()
+	round, err := utils.RedisClient.Incr(c.Request().Context(), "current_round").Result()
 	if err != nil {
 		logger.Errorf("could not increment current_round: %v", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
@@ -151,9 +161,37 @@ func StartRound(c echo.Context) error {
 		})
 	}
 
+	roundID := strconv.FormatInt(round, 10)
+
+	timeStr, err := utils.RedisClient.HGet(c.Request().Context(), "round_end_time", roundID).Result()
+	if err != nil {
+		logger.Errorf("Round get time error: %v", err.Error())
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "failed",
+			"error":  "something went wrong",
+		})
+	}
+
+	expTime, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "failed",
+			"error":  "incorrect time format",
+		})
+	}
+
 	err = utils.RedisClient.Set(c.Request().Context(), "is_round_started", true, 0).Err()
 	if err != nil {
-		logger.Errorf("could not get round:started: %v", err)
+		logger.Errorf("could not get current_round: %v", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "failed",
+			"error":  "something went wrong",
+		})
+	}
+
+	err = utils.RedisClient.ExpireAt(c.Request().Context(), "current_round", expTime).Err()
+	if err != nil {
+		logger.Errorf("current_round TTL set error: %v", err.Error())
 		return c.JSON(http.StatusInternalServerError, echo.Map{
 			"status": "failed",
 			"error":  "something went wrong",
@@ -163,6 +201,6 @@ func StartRound(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"status":        "success",
 		"message":       "round started",
-		"started_round": newRound,
+		"started_round": round,
 	})
 }
