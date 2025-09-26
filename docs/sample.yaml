@@ -4,7 +4,7 @@ info:
   description: API Documentation
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:8080
+  - url: https://kabutar.codechefvit.com
     description: Local server
 paths:
   /signup:
@@ -660,7 +660,7 @@ paths:
                         value: Failed to read Judge0 response
                       decode_error:
                         value: Error decoding response from Judge0
-  
+
   /callback:
     post:
       summary: Judge0 callback endpoint (internal use only)
@@ -708,7 +708,7 @@ paths:
                 $ref: "#/components/schemas/UserListResponse"
         "500":
           description: Internal server error
-          
+
   /runcode:
     post:
       summary: Run code against test cases without submission
@@ -792,7 +792,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse" 
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal server error
           content:
@@ -803,7 +803,7 @@ paths:
                   - error
                 properties:
                   error:
-                    type: string        
+                    type: string
 
   /users/{id}/ban:
     post:
@@ -1017,7 +1017,7 @@ paths:
     get:
       summary: Load user dashboard
       description: >
-        Fetches the dashboard details for the authenticated user.  
+        Fetches the dashboard details for the authenticated user.
         It includes user info, submissions, current round, questions completed, and scores.
       tags:
         - Dashboard
@@ -1037,52 +1037,34 @@ paths:
                   data:
                     type: object
                     properties:
-                      userName:
+                      username:
                         type: string
-                        example: John Doe
                       email:
                         type: string
-                        example: john@example.com
-                      currentRound:
-                        type: integer
-                        format: int8
-                        example: 2
-                      questionsCompleted0:
-                        type: integer
-                        example: 2
-                      questionsCompleted1:
-                        type: integer
-                        example: 5
-                      questionsCompleted2:
-                        type: integer
-                        example: 3
-                      questionsCompleted3:
-                        type: integer
-                        example: 1
-                      questionsNotCompleted0:
-                        type: integer
-                        example: 0
-                      questionsNotCompleted1:
-                        type: integer
-                        example: 3
-                      questionsNotCompleted2:
-                        type: integer
-                        example: 4
-                      questionsNotCompleted3:
-                        type: integer
-                        example: 2
-                      round0Score:
-                        type: integer
-                        example: 50
-                      round1Score:
-                        type: integer
-                        example: 120
-                      round2Score:
-                        type: integer
-                        example: 60
-                      round3Score:
-                        type: integer
-                        example: 20
+                        format: email
+                      questions_completed:
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
+                      questions_not_completed:
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
+                      round_scores:
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
+                      current_round:
+                        type: int8
         "400":
           description: Bad request (user ID not found or invalid query)
           content:
@@ -1599,7 +1581,7 @@ components:
           type: string
           format: uuid
           nullable: true
-    
+
     SubmissionResult:
       type: object
       properties:
@@ -1734,4 +1716,3 @@ components:
               description: Programming language used
       required:
         - result
- 

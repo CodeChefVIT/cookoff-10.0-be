@@ -75,43 +75,38 @@ func LoadDashboard(c echo.Context) error {
 		}
 	}
 
-	var r0s, r1s, r2s, r3s = 0, 0, 0, 0
-	var qr0c, qr1c, qr2c, qr3c = 0, 0, 0, 0
+	round_scores := [4]int32{0, 0, 0, 0}
+	questions_completed := [4]int32{0, 0, 0, 0}
+	questions_not_completed := [4]int32{0, 0, 0, 0}
 
 	for _, qdata := range questionids {
 		switch qdata.Round {
 		case 0:
-			qr0c += 1
-			r0s += int(qdata.Points)
+			questions_completed[0] += 1
+			round_scores[0] += qdata.Points
 		case 1:
-			qr1c += 1
-			r1s += int(qdata.Points)
+			questions_completed[1] += 1
+			round_scores[1] += qdata.Points
 		case 2:
-			qr2c += 1
-			r2s += int(qdata.Points)
+			questions_completed[2] += 1
+			round_scores[2] += qdata.Points
 		case 3:
-			qr3c += 1
-			r3s += int(qdata.Points)
+			questions_completed[3] += 1
+			round_scores[3] += qdata.Points
 		}
 	}
+
+	questions_not_completed[0] = 2 - questions_completed[0]
+	questions_not_completed[1] = 8 - questions_completed[1]
+	questions_not_completed[2] = 7 - questions_completed[2]
+	questions_not_completed[3] = 3 - questions_completed[3]
 
 	dashboardData.UserName = theUser.Name
 	dashboardData.Email = theUser.Email
 
-	dashboardData.QuestionsCompleted0 = int64(qr0c)
-	dashboardData.QuestionsCompleted1 = int64(qr1c)
-	dashboardData.QuestionsCompleted2 = int64(qr2c)
-	dashboardData.QuestionsCompleted3 = int64(qr3c)
-
-	dashboardData.QuestionsNotCompleted0 = int64(2 - qr0c)
-	dashboardData.QuestionsNotCompleted1 = int64(8 - qr1c)
-	dashboardData.QuestionsNotCompleted2 = int64(7 - qr2c)
-	dashboardData.QuestionsNotCompleted3 = int64(3 - qr3c)
-
-	dashboardData.Round0Score = int32(r0s)
-	dashboardData.Round1Score = int32(r1s)
-	dashboardData.Round2Score = int32(r2s)
-	dashboardData.Round3Score = int32(r3s)
+	dashboardData.QuestionsCompleted = questions_completed
+	dashboardData.QuestionsNotCompleted = questions_not_completed
+	dashboardData.RoundScores = round_scores
 
 	dashboardData.CurrentRound = int8(theUser.RoundQualified)
 

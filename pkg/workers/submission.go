@@ -56,92 +56,41 @@ func ProcessJudge0CallbackTask(ctx context.Context, t *asynq.Task) error {
 		log.Fatalf("Error parsing UUID: %v", err)
 	}
 
+	status := ""
+
 	switch data.Status.ID {
 	case "1":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"In Queue",
-		)
+		status = "In Queue"
 	case "2":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Processing",
-		)
+		status = "Processing"
 	case "3":
 		// testcasesPassed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"success")
+		status = "success"
 	case "4":
 		// testcasesFailed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"wrong answer",
-		)
+		status = "wrong answer"
 	case "5":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Time Limit Exceeded",
-		)
+		status = "Time Limit Exceeded"
 	case "6":
 		// testcasesFailed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Compilation error",
-		)
+		status = "Compilation error"
 	case "7", "8", "9", "10", "11", "12":
 		// testcasesFailed++
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Runtime error",
-		)
+		status = "Runtime error"
 	case "13":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Internal Error",
-		)
+		status = "Internal Error"
 	case "14":
-		err = handleCompilationError(
-			ctx,
-			idUUID,
-			data,
-			int(timeValue*1000),
-			testidUUID,
-			"Exec Format Error",
-		)
+		status = "Exec Format Error"
 	}
+
+	err = handleCompilationError(
+		ctx,
+		idUUID,
+		data,
+		int(timeValue*1000),
+		testidUUID,
+		status,
+	)
 
 	if err != nil {
 		return err
@@ -198,14 +147,13 @@ func handleCompilationError(
 	}
 
 	err = utils.Queries.CreateSubmissionResult(ctx, db.CreateSubmissionResultParams{
-		ID:            subID,
-		TestcaseID:    uuid.NullUUID{UUID: testcase, Valid: true},
-		SubmissionID:  idUUID,
-		Runtime:       pgtype.Numeric{Int: big.NewInt(int64(time)), Valid: true},
-		Memory:        pgtype.Numeric{Int: big.NewInt(int64(data.Memory)), Valid: true},
-		PointsAwarded: 10,
-		Status:        status,
-		Description:   &data.Status.Description,
+		ID:           subID,
+		TestcaseID:   uuid.NullUUID{UUID: testcase, Valid: true},
+		SubmissionID: idUUID,
+		Runtime:      pgtype.Numeric{Int: big.NewInt(int64(time)), Valid: true},
+		Memory:       pgtype.Numeric{Int: big.NewInt(int64(data.Memory)), Valid: true},
+		Status:       status,
+		Description:  &data.Status.Description,
 	})
 	if err != nil {
 		log.Println("Error creating submission status error: ", err)
