@@ -71,7 +71,6 @@ func CreateBatchSubmission(submissionID, sourceCode string, languageID int, test
 		return nil, errors.New("JUDGE0_URI not set in environment")
 	}
 
-
 	batchURL := judge0URI + "/submissions/batch?base64_encoded=true"
 
 	req, err := http.NewRequest("POST", batchURL, bytes.NewBuffer(data))
@@ -142,10 +141,10 @@ func CreateSubmission(ctx context.Context, question_id uuid.UUID, language_id in
 		runtime, _ := testcase.Runtime.Float64Value()
 		testcases_ids = append(testcases_ids, testcase.ID)
 		payload.Submissions[i] = Judge0Submission{
-			SourceCode:     (source),
+			SourceCode:     B64(source),
 			LanguageID:     language_id,
-			Stdin:          testcase.Input,
-			ExpectedOutput: testcase.ExpectedOutput,
+			Stdin:          B64(testcase.Input),
+			ExpectedOutput: B64(testcase.ExpectedOutput),
 			Runtime:        runtime.Float64 * float64(runtime_mut),
 			Callback:       callback_url,
 		}

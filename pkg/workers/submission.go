@@ -147,14 +147,13 @@ func handleCompilationError(
 	}
 
 	err = utils.Queries.CreateSubmissionResult(ctx, db.CreateSubmissionResultParams{
-		ID:            subID,
-		TestcaseID:    uuid.NullUUID{UUID: testcase, Valid: true},
-		SubmissionID:  idUUID,
-		Runtime:       pgtype.Numeric{Int: big.NewInt(int64(time)), Valid: true},
-		Memory:        pgtype.Numeric{Int: big.NewInt(int64(data.Memory)), Valid: true},
-		PointsAwarded: 10,
-		Status:        status,
-		Description:   &data.Status.Description,
+		ID:           subID,
+		TestcaseID:   uuid.NullUUID{UUID: testcase, Valid: true},
+		SubmissionID: idUUID,
+		Runtime:      pgtype.Numeric{Int: big.NewInt(int64(time)), Valid: true},
+		Memory:       pgtype.Numeric{Int: big.NewInt(int64(data.Memory)), Valid: true},
+		Status:       status,
+		Description:  &data.Status.Description,
 	})
 	if err != nil {
 		log.Println("Error creating submission status error: ", err)
