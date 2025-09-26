@@ -71,7 +71,7 @@ func Signup(c echo.Context) error {
 		RegNo:          payload.RegNo,
 		Password:       string(hashed),
 		Role:           "user",
-		RoundQualified: 0,
+		RoundQualified: 1,
 		Score: pgtype.Numeric{
 			Int:              big.NewInt(0),
 			Exp:              0,
