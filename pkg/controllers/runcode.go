@@ -33,7 +33,7 @@ func RunCode(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	testcasesRows, err := utils.Queries.GetTestCasesByQuestion(ctx, questionID)
+	testcasesRows, err := utils.Queries.GetPublicTestCasesByQuestion(ctx, questionID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch testcases"})
 	}
