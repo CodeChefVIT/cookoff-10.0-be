@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
@@ -101,6 +104,21 @@ func GetQuestionsByRound(c echo.Context) error {
 		})
 	}
 
+	cache_round_key := fmt.Sprintf("questions_round_%d", round)
+	qs, err := utils.RedisClient.Get(c.Request().Context(), cache_round_key).Result()
+
+	if err == nil {
+		result := []map[string]any{}
+		err := json.Unmarshal([]byte(qs), &result)
+		if err == nil {
+			return c.JSON(http.StatusOK, echo.Map{
+				"status":              "success",
+				"round":               round,
+				"questions_testcases": result,
+			})
+		}
+	}
+
 	questions, err := utils.Queries.GetQuestionsByRound(c.Request().Context(), int32(round))
 
 	if err != nil {
@@ -128,6 +146,9 @@ func GetQuestionsByRound(c echo.Context) error {
 			"testcases": testcases,
 		})
 	}
+
+	qdata, _ := json.Marshal(result)
+	utils.RedisClient.Set(c.Request().Context(), cache_round_key, qdata, 2*time.Minute)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"status":              "success",
