@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )

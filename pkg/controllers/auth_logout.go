@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )

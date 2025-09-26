@@ -10,8 +10,8 @@ import (
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgtype"

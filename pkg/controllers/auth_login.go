@@ -8,9 +8,9 @@ import (
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"

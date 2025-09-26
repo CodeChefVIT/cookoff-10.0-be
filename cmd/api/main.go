@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/router"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
 	"github.com/hibiken/asynq"
 	"github.com/labstack/echo/v4"
