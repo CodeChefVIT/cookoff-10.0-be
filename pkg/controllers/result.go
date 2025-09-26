@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
+	submissions "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -33,9 +33,8 @@ type TCResult struct {
 	Memory         float64 `json:"memory"`
 	Status         string  `json:"status"`
 	Description    string  `json:"description"`
-	ExpectedOutput string  `json:"expected_output"` 
+	ExpectedOutput string  `json:"expected_output"`
 }
-
 
 func GetResult(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(c.Request().Context(), 2*time.Minute)
@@ -92,7 +91,6 @@ func fetchResultWithTestcases(ctx context.Context, subID uuid.UUID, c echo.Conte
 	if err != nil {
 		return c.JSON(500, echo.Map{"error": "Failed to fetch testcases"})
 	}
-
 
 	for i := range result.Testcases {
 		if i < len(testcases) {

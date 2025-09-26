@@ -5,8 +5,8 @@ import (
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
