@@ -25,5 +25,4 @@ func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	testcaseRoutes(api)
 	adminRoutes(api)
 
-	timerRoutes(api)
 }
