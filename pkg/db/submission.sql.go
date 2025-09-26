@@ -423,3 +423,86 @@ func (q *Queries) GetSubmissionsByUserID(ctx context.Context, userID uuid.UUID) 
 
 	return items, nil
 }
+
+const getTotalSubmissionsCount = `-- name: GetTotalSubmissionsCount :one
+SELECT COUNT(*) 
+FROM submissions
+`
+
+func (q *Queries) GetTotalSubmissionsCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, getTotalSubmissionsCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+
+const getRoundWiseQuestionSubmissions = `-- name: GetRoundWiseQuestionSubmissions :many
+SELECT 
+    q.round AS round_id,
+    s.question_id,
+    COUNT(*) AS submissions_count
+FROM submissions s
+INNER JOIN questions q ON s.question_id = q.id
+GROUP BY q.round, s.question_id
+ORDER BY q.round, s.question_id
+`
+
+type RoundWiseQuestionSubmissions struct {
+    RoundID          int32     `json:"round_id"`
+    QuestionID       uuid.UUID `json:"question_id"`
+    SubmissionsCount int64     `json:"submissions_count"`
+}
+
+func (q *Queries) GetRoundWiseQuestionSubmissions(ctx context.Context) ([]RoundWiseQuestionSubmissions, error) {
+    rows, err := q.db.Query(ctx, getRoundWiseQuestionSubmissions)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var items []RoundWiseQuestionSubmissions
+    for rows.Next() {
+        var i RoundWiseQuestionSubmissions
+        if err := rows.Scan(&i.RoundID, &i.QuestionID, &i.SubmissionsCount); err != nil {
+            return nil, err
+        }
+        items = append(items, i)
+    }
+    return items, nil
+}
+
+
+
+const getSubmissionsByLanguage = `-- name: GetSubmissionsByLanguage :many
+SELECT 
+    language_id,
+    COUNT(*) AS submissions_count
+FROM submissions
+GROUP BY language_id
+ORDER BY submissions_count DESC
+`
+
+type SubmissionsByLanguage struct {
+    LanguageID       int32 `json:"language_id"`
+    SubmissionsCount int64 `json:"submissions_count"`
+}
+
+func (q *Queries) GetSubmissionsByLanguage(ctx context.Context) ([]SubmissionsByLanguage, error) {
+    rows, err := q.db.Query(ctx, getSubmissionsByLanguage)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var items []SubmissionsByLanguage
+    for rows.Next() {
+        var i SubmissionsByLanguage
+        if err := rows.Scan(&i.LanguageID, &i.SubmissionsCount); err != nil {
+            return nil, err
+        }
+        items = append(items, i)
+    }
+
+    return items, nil
+}

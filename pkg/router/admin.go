@@ -22,4 +22,7 @@ func adminRoutes(api *echo.Group) {
 
 	// Submissions
 	admin.GET("/users/:id/submissions", controllers.GetUserSubmissions)
+
+	// Analytics
+	admin.GET("/analytics", controllers.GetAnalytics)
 }
