@@ -119,42 +119,70 @@ func GetQuestionsByRound(c echo.Context) error {
 		}
 	}
 
-	questions, err := utils.Queries.GetQuestionsByRound(c.Request().Context(), int32(round))
+	lock_key := fmt.Sprintf("lock_%s", cache_round_key)
+	gotLock, err := utils.RedisClient.SetNX(c.Request().Context(), lock_key, round, 5*time.Second).Result()
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"status":  "Failed",
-			"message": "unable to fetch the questions",
+			"status":  "failed",
+			"message": "failed to acquire lock",
 			"error":   err.Error(),
 		})
 	}
 
-	result := []map[string]any{}
+	if gotLock {
+		questions, err := utils.Queries.GetQuestionsByRound(c.Request().Context(), int32(round))
 
-	for _, q := range questions {
-		testcases, err := utils.Queries.GetTestCasesByQuestion(c.Request().Context(), q.ID)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, echo.Map{
-				"status":      "Failed",
-				"message":     "Could not get the testcases for question",
-				"question_id": q.ID,
-				"error":       err.Error(),
+				"status":  "Failed",
+				"message": "unable to fetch the questions",
+				"error":   err.Error(),
 			})
 		}
-		result = append(result, map[string]any{
-			"question":  q,
-			"testcases": testcases,
+
+		result := []map[string]any{}
+
+		for _, q := range questions {
+			testcases, err := utils.Queries.GetTestCasesByQuestion(c.Request().Context(), q.ID)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, echo.Map{
+					"status":      "Failed",
+					"message":     "Could not get the testcases for question",
+					"question_id": q.ID,
+					"error":       err.Error(),
+				})
+			}
+			result = append(result, map[string]any{
+				"question":  q,
+				"testcases": testcases,
+			})
+		}
+
+		qdata, _ := json.Marshal(result)
+		utils.RedisClient.Set(c.Request().Context(), cache_round_key, qdata, 2*time.Minute)
+
+		return c.JSON(http.StatusOK, echo.Map{
+			"status":              "success",
+			"round":               round,
+			"questions_testcases": result,
 		})
+	} else {
+		for {
+			qdata, err := utils.RedisClient.Get(c.Request().Context(), cache_round_key).Result()
+			if err == nil {
+				result := []map[string]any{}
+				json.Unmarshal([]byte(qdata), &result)
+				return c.JSON(http.StatusOK, echo.Map{
+					"status":              "success",
+					"round":               round,
+					"questions_testcases": result,
+				})
+			}
+			time.Sleep(20 * time.Millisecond)
+		}
 	}
 
-	qdata, _ := json.Marshal(result)
-	utils.RedisClient.Set(c.Request().Context(), cache_round_key, qdata, 2*time.Minute)
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"status":              "success",
-		"round":               round,
-		"questions_testcases": result,
-	})
 }
 
 func UpdateQuestion(c echo.Context) error {
