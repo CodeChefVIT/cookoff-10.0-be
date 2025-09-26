@@ -1095,6 +1095,160 @@ paths:
                     example: Could not get the required user from database
                   error:
                     type: string
+
+  /getTime:
+    get:
+      summary: Gets the time info
+      tags:
+        - Timer
+      description: Gives the server time, round start time and round end time
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTimeResponse"
+        "401":
+          description: User's round and current round does not match
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Round not started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /setTime:
+    post:
+      summary: Sets round end time
+      tags:
+        - Timer
+      description: Sets the round end time for a particular round in reidis cache in a hash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetTimeRequest"
+      responses:
+        "200":
+          description: Time set successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetTimeResponse"
+        "400":
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "406":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Cannot set time when a round is in progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /updateTime:
+    post:
+      summary: Update round end time
+      tags:
+        - Timer
+      description: Takes duration and adds it to the round end time for a round
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTimeRequest"
+      responses:
+        "200":
+          description: Time updation successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateTimeResponse"
+        "400":
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "406":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /startRound:
+    get:
+      summary: Starts a round
+      tags:
+        - Timer
+      description: Starts a round and inits the neccesary redis keys
+      responses:
+        "200":
+          description: Round start successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartRoundResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resetRound:
+    get:
+      summary: Resets the round's keys
+      tags:
+        - Timer
+      description: Resets the current_round, round_start_time and is_round_started keys
+      responses:
+        "200":
+          description: Keys reset successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetRoundResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     ErrorResponse:
@@ -1716,3 +1870,84 @@ components:
               description: Programming language used
       required:
         - result
+
+    GetTimeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        round_end_time:
+          type: string
+          example: "2025-09-28T08:00:00+05:30"
+        server_time:
+          type: string
+          example: "2025-09-28T08:00:00+05:30"
+        round_start_time:
+          type: string
+          example: "2025-09-28T08:00:00+05:30"
+
+    SetTimeRequest:
+      type: object
+      required:
+        - round_id
+        - time
+      properties:
+        round_id:
+          type: string
+        time:
+          type: string
+
+    SetTimeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "time set successfully"
+
+    UpdateTimeRequest:
+      type: object
+      required:
+        - round_id
+        - duration
+      properties:
+        round_id:
+          type: string
+        duration:
+          type: string
+
+    UpdateTimeResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "time updated successfully"
+
+    StartRoundResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "round started"
+        started_round":
+          type: string
+          example: "1"
+
+    ResetRoundResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "reset current_round, round_start_time and is_round_started successful"

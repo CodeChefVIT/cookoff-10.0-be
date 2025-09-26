@@ -28,6 +28,10 @@ func StartRound(c echo.Context) error {
 	val, err := strconv.Atoi(roundStr)
 	if err != nil {
 		logger.Errorf("int conversion err:", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "failed",
+			"error":  "something went wrong",
+		})
 	}
 
 	val++
