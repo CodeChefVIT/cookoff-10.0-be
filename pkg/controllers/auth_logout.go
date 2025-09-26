@@ -56,7 +56,7 @@ func Logout(c echo.Context) error {
 		access.MaxAge = -1
 		access.Expires = time.Now()
 		access.HttpOnly = true
-		access.Secure = true
+		access.Secure = utils.Config.CookieSecure
 		access.Path = "/"
 		access.Domain = domain
 		access.SameSite = http.SameSiteNoneMode
@@ -68,7 +68,7 @@ func Logout(c echo.Context) error {
 		refresh.MaxAge = -1
 		refresh.Expires = time.Now()
 		refresh.HttpOnly = true
-		refresh.Secure = true
+		refresh.Secure = utils.Config.CookieSecure
 		refresh.Path = "/"
 		refresh.Domain = domain
 		refresh.SameSite = http.SameSiteNoneMode

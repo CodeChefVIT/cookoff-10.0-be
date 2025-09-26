@@ -1037,52 +1037,34 @@ paths:
                   data:
                     type: object
                     properties:
-                      userName:
+                      username:
                         type: string
-                        example: John Doe
                       email:
                         type: string
-                        example: john@example.com
-                      currentRound:
-                        type: integer
-                        format: int8
-                        example: 2
-                      questionsCompleted0:
-                        type: integer
-                        example: 2
-                      questionsCompleted1:
-                        type: integer
-                        example: 5
-                      questionsCompleted2:
-                        type: integer
-                        example: 3
-                      questionsCompleted3:
-                        type: integer
-                        example: 1
-                      questionsNotCompleted0:
-                        type: integer
-                        example: 0
-                      questionsNotCompleted1:
-                        type: integer
-                        example: 3
-                      questionsNotCompleted2:
-                        type: integer
-                        example: 4
-                      questionsNotCompleted3:
-                        type: integer
-                        example: 2
-                      round0Score:
-                        type: integer
-                        example: 50
-                      round1Score:
-                        type: integer
-                        example: 120
-                      round2Score:
-                        type: integer
-                        example: 60
-                      round3Score:
-                        type: integer
-                        example: 20
+                        format: email
+                      questions_completed:
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
+                      questions_not_completed:
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
+                      round_scores:
+                        type: array
+                        items:
+                          type: integer
+                          format: int32
+                        minItems: 4
+                        maxItems: 4
+                      current_round:
+                        type: int8
         "400":
           description: Bad request (user ID not found or invalid query)
           content:

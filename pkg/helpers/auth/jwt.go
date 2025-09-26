@@ -27,7 +27,7 @@ type RefreshTokenClaims struct {
 }
 
 func CreateAccessToken(user *db.User) (string, error) {
-	expirationTime := time.Now().Add(1 * time.Minute)
+	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &AccessTokenClaims{
 		Username: user.Name,
 		UserID:   user.ID.String(),
@@ -43,7 +43,7 @@ func CreateAccessToken(user *db.User) (string, error) {
 }
 
 func CreateRefreshToken(user *db.User) (string, error) {
-	expirationTime := time.Now().Add(1*time.Hour + 30*time.Minute)
+	expirationTime := time.Now().Add(2 * time.Hour)
 	claims := &RefreshTokenClaims{
 		UserID: user.ID.String(),
 		Type:   "refresh",

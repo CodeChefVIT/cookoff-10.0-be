@@ -115,7 +115,7 @@ func RefreshToken(c echo.Context) error {
 		Value:    accessToken,
 		MaxAge:   3600,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
@@ -125,7 +125,7 @@ func RefreshToken(c echo.Context) error {
 		Value:    newRefreshToken,
 		MaxAge:   7200,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   utils.Config.CookieSecure,
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
