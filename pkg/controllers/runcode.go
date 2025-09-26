@@ -101,6 +101,7 @@ func RunCode(c echo.Context) error {
 		data.Stdout, _ = submissions.DecodeB64(data.Stdout)
 		data.Stderr, _ = submissions.DecodeB64(data.Stderr)
 		data.Message, _ = submissions.DecodeB64(data.Message)
+		data.CompileOutput, _ = submissions.DecodeB64(data.CompileOutput)
 
 		response.Result[i] = data
 
