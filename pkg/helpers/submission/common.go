@@ -21,6 +21,8 @@ type Judgeresp struct {
 	Stderr   string `json:"stderr"`
 	Message  string `json:"message"`
 	Language string `json:"language"`
+	CompileOutput string `json:"compile_output"`
+ 
 }
 
 type Status struct {
