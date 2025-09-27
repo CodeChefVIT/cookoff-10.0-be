@@ -55,7 +55,7 @@ type Testcase struct {
 	ID             uuid.UUID
 	ExpectedOutput string
 	Memory         pgtype.Numeric
-	Input          string
+	Input          *string
 	Hidden         bool
 	Runtime        pgtype.Numeric
 	QuestionID     uuid.UUID

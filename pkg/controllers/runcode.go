@@ -63,11 +63,10 @@ func RunCode(c echo.Context) error {
 		finalRuntime := runtimeVal.Float64 * float64(runtimeMut)
 
 		payload := submissions.Submission{
-			LanguageID:     req.LanguageID,
-			SourceCode:     submissions.B64(req.SourceCode),
-			Stdin:          submissions.B64(tc.Input),
-			ExpectedOutput: submissions.B64(tc.ExpectedOutput),
-			Runtime:        finalRuntime,
+			LanguageID: req.LanguageID,
+			SourceCode: submissions.B64(req.SourceCode),
+			Stdin:      submissions.B64(*tc.Input),
+			Runtime:    finalRuntime,
 		}
 
 		payloadJSON, err := json.Marshal(payload)

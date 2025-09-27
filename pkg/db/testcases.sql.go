@@ -31,7 +31,7 @@ type CreateTestCaseParams struct {
 	ID             uuid.UUID
 	ExpectedOutput string
 	Memory         pgtype.Numeric
-	Input          string
+	Input          *string
 	Hidden         bool
 	Runtime        pgtype.Numeric
 	QuestionID     uuid.UUID
@@ -71,7 +71,7 @@ func (q *Queries) DeleteTestCase(ctx context.Context, id uuid.UUID) error {
 }
 
 const getAllTestCases = `-- name: GetAllTestCases :many
-SELECT 
+SELECT
     id,
     expected_output,
     memory,
@@ -110,32 +110,90 @@ func (q *Queries) GetAllTestCases(ctx context.Context) ([]Testcase, error) {
 	return items, nil
 }
 
-const getPublicTestCasesByQuestion = `-- name: GetPublicTestCasesByQuestion :many
-SELECT 
+const getAllTestCasesByQuestion = `-- name: GetAllTestCasesByQuestion :many
+SELECT
     id,
+    memory,
     expected_output,
+    input,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE question_id = $1
+`
+
+type GetAllTestCasesByQuestionRow struct {
+	ID             uuid.UUID
+	Memory         pgtype.Numeric
+	ExpectedOutput string
+	Input          *string
+	Hidden         bool
+	Runtime        pgtype.Numeric
+	QuestionID     uuid.UUID
+}
+
+func (q *Queries) GetAllTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]GetAllTestCasesByQuestionRow, error) {
+	rows, err := q.db.Query(ctx, getAllTestCasesByQuestion, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllTestCasesByQuestionRow
+	for rows.Next() {
+		var i GetAllTestCasesByQuestionRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Memory,
+			&i.ExpectedOutput,
+			&i.Input,
+			&i.Hidden,
+			&i.Runtime,
+			&i.QuestionID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPublicTestCasesByQuestion = `-- name: GetPublicTestCasesByQuestion :many
+SELECT
+    id,
     memory,
     input,
     hidden,
     runtime,
     question_id
 FROM testcases
-WHERE question_id = $1 
+WHERE question_id = $1
 AND hidden = false
 `
 
-func (q *Queries) GetPublicTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]Testcase, error) {
+type GetPublicTestCasesByQuestionRow struct {
+	ID         uuid.UUID
+	Memory     pgtype.Numeric
+	Input      *string
+	Hidden     bool
+	Runtime    pgtype.Numeric
+	QuestionID uuid.UUID
+}
+
+func (q *Queries) GetPublicTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]GetPublicTestCasesByQuestionRow, error) {
 	rows, err := q.db.Query(ctx, getPublicTestCasesByQuestion, questionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Testcase
+	var items []GetPublicTestCasesByQuestionRow
 	for rows.Next() {
-		var i Testcase
+		var i GetPublicTestCasesByQuestionRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ExpectedOutput,
 			&i.Memory,
 			&i.Input,
 			&i.Hidden,
@@ -153,7 +211,7 @@ func (q *Queries) GetPublicTestCasesByQuestion(ctx context.Context, questionID u
 }
 
 const getTestCase = `-- name: GetTestCase :one
-SELECT 
+SELECT
     id,
     expected_output,
     memory,
@@ -181,9 +239,8 @@ func (q *Queries) GetTestCase(ctx context.Context, id uuid.UUID) (Testcase, erro
 }
 
 const getTestCasesByQuestion = `-- name: GetTestCasesByQuestion :many
-SELECT 
+SELECT
     id,
-    expected_output,
     memory,
     input,
     hidden,
@@ -193,18 +250,26 @@ FROM testcases
 WHERE question_id = $1
 `
 
-func (q *Queries) GetTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]Testcase, error) {
+type GetTestCasesByQuestionRow struct {
+	ID         uuid.UUID
+	Memory     pgtype.Numeric
+	Input      *string
+	Hidden     bool
+	Runtime    pgtype.Numeric
+	QuestionID uuid.UUID
+}
+
+func (q *Queries) GetTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]GetTestCasesByQuestionRow, error) {
 	rows, err := q.db.Query(ctx, getTestCasesByQuestion, questionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Testcase
+	var items []GetTestCasesByQuestionRow
 	for rows.Next() {
-		var i Testcase
+		var i GetTestCasesByQuestionRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ExpectedOutput,
 			&i.Memory,
 			&i.Input,
 			&i.Hidden,
@@ -223,7 +288,7 @@ func (q *Queries) GetTestCasesByQuestion(ctx context.Context, questionID uuid.UU
 
 const updateTestCase = `-- name: UpdateTestCase :one
 UPDATE testcases
-SET 
+SET
     expected_output = $2,
     memory = $3,
     input = $4,
@@ -238,7 +303,7 @@ type UpdateTestCaseParams struct {
 	ID             uuid.UUID
 	ExpectedOutput string
 	Memory         pgtype.Numeric
-	Input          string
+	Input          *string
 	Hidden         bool
 	Runtime        pgtype.Numeric
 	QuestionID     uuid.UUID

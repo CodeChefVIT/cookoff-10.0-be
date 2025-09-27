@@ -120,7 +120,7 @@ type Payload struct {
 func CreateSubmission(ctx context.Context, question_id uuid.UUID, language_id int, source string) ([]byte, []uuid.UUID, error) {
 	callback_url := utils.Config.CallbackURL
 	var testcases_ids []uuid.UUID
-	testcases, err := utils.Queries.GetTestCasesByQuestion(ctx, question_id)
+	testcases, err := utils.Queries.GetAllTestCasesByQuestion(ctx, question_id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil, fmt.Errorf("no testcases exist for this question")
@@ -143,7 +143,7 @@ func CreateSubmission(ctx context.Context, question_id uuid.UUID, language_id in
 		payload.Submissions[i] = Judge0Submission{
 			SourceCode:     B64(source),
 			LanguageID:     language_id,
-			Stdin:          B64(testcase.Input),
+			Stdin:          B64(*testcase.Input),
 			ExpectedOutput: B64(testcase.ExpectedOutput),
 			Runtime:        runtime.Float64 * float64(runtime_mut),
 			Callback:       callback_url,

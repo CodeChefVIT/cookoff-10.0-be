@@ -33,7 +33,7 @@ func CreateTestCase(c echo.Context) error {
 		ID:             uuid.New(),
 		ExpectedOutput: req.ExpectedOutput,
 		Memory:         req.Memory,
-		Input:          req.Input,
+		Input:          &req.Input,
 		Hidden:         req.Hidden,
 		Runtime:        req.Runtime,
 		QuestionID:     questionID,
@@ -104,7 +104,7 @@ func UpdateTestCase(c echo.Context) error {
 		req.ExpectedOutput = existing.ExpectedOutput
 	}
 	if req.Input == "" {
-		req.Input = existing.Input
+		req.Input = *existing.Input
 	}
 	if req.Hidden == nil {
 		req.Hidden = &existing.Hidden
@@ -148,7 +148,7 @@ func UpdateTestCase(c echo.Context) error {
 		ID:             id,
 		ExpectedOutput: req.ExpectedOutput,
 		Memory:         memory,
-		Input:          req.Input,
+		Input:          &(req.Input),
 		Hidden:         *req.Hidden,
 		Runtime:        runtime,
 		QuestionID:     questionID,
