@@ -1,13 +1,17 @@
-# Build stage
-FROM golang:1.23.4-alpine AS builder
+# Single-stage Go worker
+FROM golang:1.23.4-alpine
 
-# Install git for private repositories if needed
-RUN apk add --no-cache git
+# Install git if needed and ca-certificates for HTTPS
+RUN apk add --no-cache git ca-certificates
+
+# Create non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
 
 # Set working directory
 WORKDIR /app
 
-# Copy go mod files
+# Copy Go modules files
 COPY go.mod go.sum ./
 
 # Download dependencies
@@ -17,23 +21,7 @@ RUN go mod download
 COPY . .
 
 # Build the worker binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o worker ./cmd/worker
-
-# Final stage
-FROM alpine:latest
-
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates
-
-# Create non-root user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
-
-# Set working directory
-WORKDIR /app
-
-# Copy the binary from builder stage
-COPY --from=builder /app/worker .
+RUN CGO_ENABLED=0 GOOS=linux go build -o worker ./cmd/worker
 
 # Change ownership to non-root user
 RUN chown -R appuser:appgroup /app
