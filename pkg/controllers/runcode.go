@@ -76,7 +76,14 @@ func RunCode(c echo.Context) error {
 			})
 		}
 
-		result, err := submissions.SendToJudge0(params, payloadJSON)
+		judge0URL, err := url.Parse(utils.Config.Judge0URI + "/submissions")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				"error": fmt.Sprintf("Error parsing Judge0 URL: %v", err),
+			})
+		}
+
+		result, err := submissions.SendToJudge(judge0URL, params, payloadJSON)
 		if err != nil {
 			fmt.Printf("Error sending request to Judge0: %v\n", err)
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Error sending request to Judge0"})

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -68,8 +67,10 @@ func SubmitCode(c echo.Context) error {
 	params := url.Values{}
 	params.Add("base64_encoded", "true")
 
-	judge0URL.RawQuery = params.Encode()
-	resp, err := http.Post(judge0URL.String(), "application/json", bytes.NewBuffer(payload))
+	// judge0URL.RawQuery = params.Encode()
+	// resp, err := http.Post(judge0URL.String(), "application/json", bytes.NewBuffer(payload))
+	resp, err := submissions.SendToJudge(judge0URL, params, payload)
+
 	if err != nil {
 		logger.Errorf("Error sending request to Judge0: %v", err)
 		return c.JSON(http.StatusInternalServerError, echo.Map{
@@ -165,17 +166,17 @@ func GetUserSubmissions(c echo.Context) error {
 		}
 
 		submission := db.Submission{
-			ID:             sub.ID,
-			UserID:         sub.UserID,
-			QuestionID:     sub.QuestionID,
-			LanguageID:     sub.LanguageID,
-			SourceCode:     sub.SourceCode,
+			ID:              sub.ID,
+			UserID:          sub.UserID,
+			QuestionID:      sub.QuestionID,
+			LanguageID:      sub.LanguageID,
+			SourceCode:      sub.SourceCode,
 			TestcasesPassed: sub.TestcasesPassed,
 			TestcasesFailed: sub.TestcasesFailed,
-			Runtime:        sub.Runtime,
-			Memory:         sub.Memory,
-			Status:         sub.Status,
-			Description:    sub.Description,
+			Runtime:         sub.Runtime,
+			Memory:          sub.Memory,
+			Status:          sub.Status,
+			Description:     sub.Description,
 		}
 
 		submissionsWithResults = append(submissionsWithResults, dto.SubmissionWithResults{
@@ -183,7 +184,6 @@ func GetUserSubmissions(c echo.Context) error {
 			Results:    results,
 		})
 	}
-
 
 	response := dto.UserSubmissionsResponse{
 		User:        user,
