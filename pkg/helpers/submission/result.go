@@ -136,6 +136,12 @@ func UpdateSubmission(ctx context.Context, subID uuid.UUID) error {
 		return err
 	}
 
+	err = utils.Queries.UpdateScore(ctx, subID)
+	if err != nil {
+		log.Println("Error updating the score: ", err)
+		return err
+	}
+
 	log.Printf("Submission updated successfully: %v\n", subID)
 	return nil
 }
