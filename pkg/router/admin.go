@@ -20,6 +20,10 @@ func adminRoutes(api *echo.Group) {
 	// Leaderboard
 	admin.GET("/leaderboard", controllers.GetLeaderboard)
 
+	// Analytics
+	admin.GET("/analytics", controllers.GetAnalytics)
+
+
 	//Timer
 	admin.POST("/setTime", controllers.SetTime)
 	admin.POST("/updateTime", controllers.UpdateTime)

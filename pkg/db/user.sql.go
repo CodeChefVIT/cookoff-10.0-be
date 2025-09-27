@@ -269,7 +269,7 @@ func (q *Queries) GetUserRound(ctx context.Context, id uuid.UUID) (int32, error)
 const getUsersWithCursor = `-- name: GetUsersWithCursor :many
 SELECT id, email, reg_no, password, role, round_qualified, score, name, is_banned
 FROM users
-WHERE ($1::uuid IS NULL OR id > $1)
+WHERE ($1::uuid = '00000000-0000-0000-0000-000000000000' OR id > $1::uuid)
 ORDER BY id ASC
 LIMIT $2
 `
