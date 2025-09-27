@@ -12,8 +12,8 @@ import (
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
 	submissions "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"

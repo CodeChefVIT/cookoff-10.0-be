@@ -2,12 +2,11 @@ package controllers
 
 import (
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -43,14 +42,6 @@ func Logout(c echo.Context) error {
 		}
 	}
 
-	domain := os.Getenv("DOMAIN")
-	if domain == "" {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"status": "failed",
-			"error":  "DOMAIN set crow",
-		})
-	}
-
 	if access != nil {
 		access.Value = ""
 		access.MaxAge = -1
@@ -58,7 +49,6 @@ func Logout(c echo.Context) error {
 		access.HttpOnly = true
 		access.Secure = utils.Config.CookieSecure
 		access.Path = "/"
-		access.Domain = domain
 		access.SameSite = http.SameSiteNoneMode
 		c.SetCookie(access)
 	}
@@ -70,7 +60,6 @@ func Logout(c echo.Context) error {
 		refresh.HttpOnly = true
 		refresh.Secure = utils.Config.CookieSecure
 		refresh.Path = "/"
-		refresh.Domain = domain
 		refresh.SameSite = http.SameSiteNoneMode
 		c.SetCookie(refresh)
 	}

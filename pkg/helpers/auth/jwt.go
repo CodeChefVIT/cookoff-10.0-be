@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )

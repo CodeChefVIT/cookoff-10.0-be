@@ -10,7 +10,7 @@ import (
 
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	submissions "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -33,7 +33,7 @@ func RunCode(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	testcasesRows, err := utils.Queries.GetTestCasesByQuestion(ctx, questionID)
+	testcasesRows, err := utils.Queries.GetPublicTestCasesByQuestion(ctx, questionID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch testcases"})
 	}
@@ -101,6 +101,7 @@ func RunCode(c echo.Context) error {
 		data.Stdout, _ = submissions.DecodeB64(data.Stdout)
 		data.Stderr, _ = submissions.DecodeB64(data.Stderr)
 		data.Message, _ = submissions.DecodeB64(data.Message)
+		data.CompileOutput, _ = submissions.DecodeB64(data.CompileOutput)
 
 		response.Result[i] = data
 

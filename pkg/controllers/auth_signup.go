@@ -7,8 +7,8 @@ import (
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/dto"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/auth"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -71,7 +71,7 @@ func Signup(c echo.Context) error {
 		RegNo:          payload.RegNo,
 		Password:       string(hashed),
 		Role:           "user",
-		RoundQualified: 0,
+		RoundQualified: 1,
 		Score: pgtype.Numeric{
 			Int:              big.NewInt(0),
 			Exp:              0,

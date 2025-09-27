@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/utils"
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
 )
@@ -28,6 +28,10 @@ func StartRound(c echo.Context) error {
 	val, err := strconv.Atoi(roundStr)
 	if err != nil {
 		logger.Errorf("int conversion err:", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "failed",
+			"error":  "something went wrong",
+		})
 	}
 
 	val++
