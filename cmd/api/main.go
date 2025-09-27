@@ -39,6 +39,7 @@ func main() {
 	}()
 
 	e := echo.New()
+
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI:        true,
 		LogStatus:     true,

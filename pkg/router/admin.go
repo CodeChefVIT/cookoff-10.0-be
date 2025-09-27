@@ -15,10 +15,13 @@ func adminRoutes(api *echo.Group) {
 	admin.POST("/users/:id/ban", controllers.BanUser)
 	admin.POST("/users/:id/unban", controllers.UnbanUser)
 	admin.POST("/users/:id/upgrade", controllers.UpgradeUserToRound)
-	admin.GET("/users/:id/submissions", controllers.GetSubmissionByUser)
+	admin.GET("/users/:id/submissions", controllers.GetUserSubmissions)
 
 	// Leaderboard
 	admin.GET("/leaderboard", controllers.GetLeaderboard)
+
+	// Analytics
+	admin.GET("/analytics", controllers.GetAnalytics)
 
 	//Timer
 	admin.POST("/setTime", controllers.SetTime)

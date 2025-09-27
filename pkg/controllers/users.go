@@ -22,50 +22,55 @@ type User struct {
 }
 
 func GetAllUsers(c echo.Context) error {
-	limitParam := c.QueryParam("limit")
-	cursorParam := c.QueryParam("cursor")
+    limitParam := c.QueryParam("limit")
+    limit := int32(20)
+    if limitParam != "" {
+        if l, err := strconv.Atoi(limitParam); err == nil && l > 0 {
+            limit = int32(l)
+        }
+    }
 
-	limit := int32(10)
-	if limitParam != "" {
-		if l, err := strconv.Atoi(limitParam); err == nil && l > 0 {
-			limit = int32(l)
-		}
-	}
-
-	var cursor *uuid.UUID
+    cursorParam := c.QueryParam("cursor")
+	var cursor uuid.UUID
 	if cursorParam != "" {
-		if cur, err := uuid.Parse(cursorParam); err == nil {
-			cursor = &cur
-		} else {
+		cur, err := uuid.Parse(cursorParam)
+		if err != nil {
 			return c.JSON(http.StatusBadRequest, echo.Map{
 				"status": "Invalid cursor",
 				"error":  err.Error(),
 			})
 		}
+		cursor = cur
+	} else {
+		cursor = uuid.Nil 
 	}
+
 
 	users, err := utils.Queries.GetUsersWithCursor(c.Request().Context(), db.GetUsersWithCursorParams{
-		Column1: *cursor,
+		Column1: cursor,
 		Limit:   limit,
 	})
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{
-			"status": "Could not get users",
-			"error":  err.Error(),
-		})
-	}
 
-	var nextCursor *uuid.UUID
-	if len(users) > 0 {
-		nextCursor = &users[len(users)-1].ID
-	}
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, echo.Map{
+            "status": "Could not get users",
+            "error":  err.Error(),
+        })
+    }
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"status":      "success",
-		"users":       users,
-		"next_cursor": nextCursor,
-	})
+    var nextCursorStr *string
+    if len(users) > 0 {
+        str := users[len(users)-1].ID.String()
+        nextCursorStr = &str
+    }
+
+    return c.JSON(http.StatusOK, echo.Map{
+        "status":      "success",
+        "users":       users,
+        "next_cursor": nextCursorStr,
+    })
 }
+
 
 func BanUser(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
