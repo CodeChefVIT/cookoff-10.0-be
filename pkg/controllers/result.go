@@ -7,7 +7,6 @@ import (
 	"time"
 
 	submissions "github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/submission"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/utils"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -79,22 +78,6 @@ func fetchResultWithTestcases(ctx context.Context, subID uuid.UUID, c echo.Conte
 	result, err := submissions.GetSubResult(ctx, subID)
 	if err != nil {
 		return c.JSON(500, echo.Map{"error": "Internal server error while getting submission result"})
-	}
-
-	questionID, err := uuid.Parse(result.QuestionID)
-	if err != nil {
-		return c.JSON(400, echo.Map{"error": "Invalid QuestionID UUID"})
-	}
-
-	testcases, err := utils.Queries.GetTestCasesByQuestion(ctx, questionID)
-	if err != nil {
-		return c.JSON(500, echo.Map{"error": "Failed to fetch testcases"})
-	}
-
-	for i := range result.Testcases {
-		if i < len(testcases) {
-			result.Testcases[i].ExpectedOutput = testcases[i].ExpectedOutput
-		}
 	}
 
 	return c.JSON(200, result)

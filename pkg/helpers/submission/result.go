@@ -25,12 +25,11 @@ type ResultResp struct {
 	Testcases      []TCResult `json:"testcases"`
 }
 type TCResult struct {
-	ID             string  `json:"id"`
-	Runtime        float64 `json:"runtime"`
-	Memory         float64 `json:"memory"`
-	Status         string  `json:"status"`
-	Description    string  `json:"description"`
-	ExpectedOutput string  `json:"expected_output"`
+	ID          string  `json:"id"`
+	Runtime     float64 `json:"runtime"`
+	Memory      float64 `json:"memory"`
+	Status      string  `json:"status"`
+	Description string  `json:"description"`
 }
 
 func CheckStatus(ctx context.Context, subID uuid.UUID) (bool, error) {
