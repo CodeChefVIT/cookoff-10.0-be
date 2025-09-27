@@ -117,39 +117,24 @@ FROM submissions
 WHERE id = $1
 `
 
-type GetSubmissionByIDRow struct {
-	ID              uuid.UUID
-	QuestionID      uuid.UUID
-	LanguageID      int32
-	SourceCode      string
-	TestcasesPassed pgtype.Int4
-	TestcasesFailed pgtype.Int4
-	Runtime         pgtype.Numeric
-	Memory          pgtype.Numeric
-	Status          *string
-	SubmissionTime  pgtype.Timestamp
-	Description     *string
-	UserID          uuid.UUID
-}
-
-func (q *Queries) GetSubmissionByID(ctx context.Context, id uuid.UUID) (GetSubmissionByIDRow, error) {
+func (q *Queries) GetSubmissionByID(ctx context.Context, id uuid.UUID) (Submission, error) {
 	row := q.db.QueryRow(ctx, getSubmissionByID, id)
-	var i GetSubmissionByIDRow
+	var s Submission
 	err := row.Scan(
-		&i.ID,
-		&i.QuestionID,
-		&i.LanguageID,
-		&i.SourceCode,
-		&i.TestcasesPassed,
-		&i.TestcasesFailed,
-		&i.Runtime,
-		&i.Memory,
-		&i.Status,
-		&i.SubmissionTime,
-		&i.Description,
-		&i.UserID,
+		&s.ID,
+		&s.QuestionID,
+		&s.LanguageID,
+		&s.SourceCode,
+		&s.TestcasesPassed,
+		&s.TestcasesFailed,
+		&s.Runtime,
+		&s.Memory,
+		&s.Status,
+		&s.SubmissionTime,
+		&s.Description,
+		&s.UserID,
 	)
-	return i, err
+	return s, err
 }
 
 const getSubmissionResultsBySubmissionIDQuery = `-- name: GetSubmissionResultsBySubmissionIDQuery :many
@@ -328,4 +313,196 @@ WHERE users.id = (select user_id from submissions s where s.id = $1)
 func (q *Queries) UpdateUserScoreBySubmissionID(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, updateUserScoreBySubmissionID, id)
 	return err
+}
+
+const getAllSubmissions = `-- name: GetAllSubmissions :many
+SELECT
+    id,
+    question_id,
+    language_id,
+    source_code,
+    testcases_passed,
+    testcases_failed,
+    runtime,
+    memory,
+    status,
+    submission_time,
+    description,
+    user_id
+FROM submissions
+ORDER BY submission_time DESC
+`
+
+func (q *Queries) GetAllSubmissions(ctx context.Context) ([]Submission, error) {
+	rows, err := q.db.Query(ctx, getAllSubmissions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []Submission
+	for rows.Next() {
+		var s Submission
+		if err := rows.Scan(
+			&s.ID,
+			&s.QuestionID,
+			&s.LanguageID,
+			&s.SourceCode,
+			&s.TestcasesPassed,
+			&s.TestcasesFailed,
+			&s.Runtime,
+			&s.Memory,
+			&s.Status,
+			&s.SubmissionTime,
+			&s.Description,
+			&s.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+const getSubmissionsByUserID = `-- name: GetSubmissionsByUserID :many
+SELECT
+    id,
+    question_id,
+    language_id,
+    source_code,
+    testcases_passed,
+    testcases_failed,
+    runtime,
+    memory,
+    status,
+    submission_time,
+    description,
+    user_id
+FROM submissions
+WHERE user_id = $1
+ORDER BY submission_time DESC
+`
+
+func (q *Queries) GetSubmissionsByUserID(ctx context.Context, userID uuid.UUID) ([]Submission, error) {
+	rows, err := q.db.Query(ctx, getSubmissionsByUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []Submission
+	for rows.Next() {
+		var s Submission
+		if err := rows.Scan(
+			&s.ID,
+			&s.QuestionID,
+			&s.LanguageID,
+			&s.SourceCode,
+			&s.TestcasesPassed,
+			&s.TestcasesFailed,
+			&s.Runtime,
+			&s.Memory,
+			&s.Status,
+			&s.SubmissionTime,
+			&s.Description,
+			&s.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+const getTotalSubmissionsCount = `-- name: GetTotalSubmissionsCount :one
+SELECT COUNT(*) 
+FROM submissions
+`
+
+func (q *Queries) GetTotalSubmissionsCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, getTotalSubmissionsCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+
+const getRoundWiseQuestionSubmissions = `-- name: GetRoundWiseQuestionSubmissions :many
+SELECT 
+    q.round AS round_id,
+    s.question_id,
+    COUNT(*) AS submissions_count
+FROM submissions s
+INNER JOIN questions q ON s.question_id = q.id
+GROUP BY q.round, s.question_id
+ORDER BY q.round, s.question_id
+`
+
+type RoundWiseQuestionSubmissions struct {
+    RoundID          int32     `json:"round_id"`
+    QuestionID       uuid.UUID `json:"question_id"`
+    SubmissionsCount int64     `json:"submissions_count"`
+}
+
+func (q *Queries) GetRoundWiseQuestionSubmissions(ctx context.Context) ([]RoundWiseQuestionSubmissions, error) {
+    rows, err := q.db.Query(ctx, getRoundWiseQuestionSubmissions)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var items []RoundWiseQuestionSubmissions
+    for rows.Next() {
+        var i RoundWiseQuestionSubmissions
+        if err := rows.Scan(&i.RoundID, &i.QuestionID, &i.SubmissionsCount); err != nil {
+            return nil, err
+        }
+        items = append(items, i)
+    }
+    return items, nil
+}
+
+
+
+const getSubmissionsByLanguage = `-- name: GetSubmissionsByLanguage :many
+SELECT 
+    language_id,
+    COUNT(*) AS submissions_count
+FROM submissions
+GROUP BY language_id
+ORDER BY submissions_count DESC
+`
+
+type SubmissionsByLanguage struct {
+    LanguageID       int32 `json:"language_id"`
+    SubmissionsCount int64 `json:"submissions_count"`
+}
+
+func (q *Queries) GetSubmissionsByLanguage(ctx context.Context) ([]SubmissionsByLanguage, error) {
+    rows, err := q.db.Query(ctx, getSubmissionsByLanguage)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var items []SubmissionsByLanguage
+    for rows.Next() {
+        var i SubmissionsByLanguage
+        if err := rows.Scan(&i.LanguageID, &i.SubmissionsCount); err != nil {
+            return nil, err
+        }
+        items = append(items, i)
+    }
+
+    return items, nil
 }

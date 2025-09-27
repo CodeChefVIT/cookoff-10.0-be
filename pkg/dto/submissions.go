@@ -1,5 +1,9 @@
 package dto
 
+import (
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/db"
+)
+
 type SubmissionRequest struct {
 	SourceCode string `json:"source_code" validate:"required"`
 	LanguageID int    `json:"language_id" validate:"required"`
@@ -16,4 +20,14 @@ type CustomSubmissionRequest struct {
 	SourceCode string `json:"source_code" validate:"required"`
 	LanguageID int    `json:"language_id" validate:"required"`
 	Input      string `json:"input"`
+}
+
+type UserSubmissionsResponse struct {
+	User        db.User       `json:"user"`
+	Submissions []SubmissionWithResults `json:"submissions"`
+}
+
+type SubmissionWithResults struct {
+	Submission db.Submission        `json:"submission"`
+	Results    []db.SubmissionResult `json:"results"`
 }

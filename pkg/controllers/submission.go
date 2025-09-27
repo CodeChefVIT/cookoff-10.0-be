@@ -129,3 +129,52 @@ func SubmitCode(c echo.Context) error {
 		"submission_id": submissionID,
 	})
 }
+
+// GetUserSubmissions fetches all submissions of a user with their results
+func GetUserSubmissions(c echo.Context) error {
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"error": "Invalid user ID",
+		})
+	}
+
+	user, err := utils.Queries.GetUserById(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to fetch user",
+		})
+	}
+
+	subs, err := utils.Queries.GetSubmissionsByUserID(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"error": "Failed to fetch submissions",
+		})
+	}
+
+	var submissionsWithResults []dto.SubmissionWithResults
+
+	for _, sub := range subs {
+		results, err := utils.Queries.GetSubmissionResultsBySubmissionID(c.Request().Context(), sub.ID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"error": fmt.Sprintf("Failed to fetch results for submission %s", sub.ID),
+			})
+		}
+
+		submissionsWithResults = append(submissionsWithResults, dto.SubmissionWithResults{
+			Submission: sub,
+			Results:    results,
+		})
+	}
+
+	response := dto.UserSubmissionsResponse{
+		User:        user,
+		Submissions: submissionsWithResults,
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
