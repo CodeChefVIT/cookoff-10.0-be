@@ -28,13 +28,11 @@ type ResultResp struct {
 }
 
 type TCResult struct {
-	ID             string  `json:"id"`
-	Runtime        float64 `json:"runtime"`
-	Memory         float64 `json:"memory"`
-	Status         string  `json:"status"`
-	Description    string  `json:"description"`
-	Stdout         string  `json:"stdout"`
-	ExpectedOutput string  `json:"expected_output"`
+	ID          string  `json:"id"`
+	Runtime     float64 `json:"runtime"`
+	Memory      float64 `json:"memory"`
+	Status      string  `json:"status"`
+	Description string  `json:"description"`
 }
 
 func GetResult(c echo.Context) error {
