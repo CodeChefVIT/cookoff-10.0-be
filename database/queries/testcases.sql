@@ -85,3 +85,16 @@ SELECT
     question_id
 FROM testcases
 WHERE question_id = $1;
+
+-- name: GetAllPublicTestCasesByQuestion :many
+SELECT
+    id,
+    memory,
+    input,
+    expected_output,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE question_id = $1
+AND hidden = false;

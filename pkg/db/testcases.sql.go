@@ -70,6 +70,58 @@ func (q *Queries) DeleteTestCase(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAllPublicTestCasesByQuestion = `-- name: GetAllPublicTestCasesByQuestion :many
+SELECT
+    id,
+    memory,
+    input,
+    expected_output,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE question_id = $1
+AND hidden = false
+`
+
+type GetAllPublicTestCasesByQuestionRow struct {
+	ID             uuid.UUID
+	Memory         pgtype.Numeric
+	Input          *string
+	ExpectedOutput string
+	Hidden         bool
+	Runtime        pgtype.Numeric
+	QuestionID     uuid.UUID
+}
+
+func (q *Queries) GetAllPublicTestCasesByQuestion(ctx context.Context, questionID uuid.UUID) ([]GetAllPublicTestCasesByQuestionRow, error) {
+	rows, err := q.db.Query(ctx, getAllPublicTestCasesByQuestion, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllPublicTestCasesByQuestionRow
+	for rows.Next() {
+		var i GetAllPublicTestCasesByQuestionRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Memory,
+			&i.Input,
+			&i.ExpectedOutput,
+			&i.Hidden,
+			&i.Runtime,
+			&i.QuestionID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllTestCases = `-- name: GetAllTestCases :many
 SELECT
     id,

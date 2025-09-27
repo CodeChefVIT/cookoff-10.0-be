@@ -33,7 +33,7 @@ func RunCode(c echo.Context) error {
 	}
 
 	ctx := context.Background()
-	testcasesRows, err := utils.Queries.GetPublicTestCasesByQuestion(ctx, questionID)
+	testcasesRows, err := utils.Queries.GetAllPublicTestCasesByQuestion(ctx, questionID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch testcases"})
 	}
@@ -53,7 +53,6 @@ func RunCode(c echo.Context) error {
 	response := RunCodeResponse{
 		Result: make([]submissions.Judgeresp, len(testcasesRows)),
 	}
-
 	for i, tc := range testcasesRows {
 		runtimeVal, err := tc.Runtime.Float64Value()
 		if err != nil {
@@ -63,10 +62,11 @@ func RunCode(c echo.Context) error {
 		finalRuntime := runtimeVal.Float64 * float64(runtimeMut)
 
 		payload := submissions.Submission{
-			LanguageID: req.LanguageID,
-			SourceCode: submissions.B64(req.SourceCode),
-			Stdin:      submissions.B64(*tc.Input),
-			Runtime:    finalRuntime,
+			LanguageID:     req.LanguageID,
+			SourceCode:     submissions.B64(req.SourceCode),
+			Stdin:          submissions.B64(*tc.Input),
+			ExpectedOutput: submissions.B64(tc.ExpectedOutput),
+			Runtime:        finalRuntime,
 		}
 
 		payloadJSON, err := json.Marshal(payload)
