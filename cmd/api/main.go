@@ -9,8 +9,6 @@ import (
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/router"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
-	"github.com/hibiken/asynq"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -30,13 +28,7 @@ func main() {
 		redisURI = "localhost:6379"
 	}
 
-	taskServer, taskClient := queue.InitQueue(redisURI, 2)
-
-	go func() {
-		mux := asynq.NewServeMux()
-		mux.HandleFunc("submission:process", workers.ProcessJudge0CallbackTask)
-		queue.StartQueueServer(taskServer, mux)
-	}()
+	_, taskClient := queue.InitQueue(redisURI, 2)
 
 	e := echo.New()
 

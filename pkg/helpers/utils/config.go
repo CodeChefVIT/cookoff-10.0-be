@@ -21,6 +21,7 @@ type cfg struct {
 	CallbackURL      string `env:"CALLBACK_URL,notEmpty"`
 	Judge0URI        string `env:"JUDGE0_URI,notEmpty"`
 	CookieSecure     bool   `env:"SECURE" envDefault:"false"`
+	WorkerCount      int    `env:"WORKER_COUNT" envDefault:"2"`
 }
 
 var Config cfg
