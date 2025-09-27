@@ -23,18 +23,6 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-// UserSubmissionsResponse defines the response structure
-type UserSubmissionsResponse struct {
-	User        db.User       `json:"user"`
-	Submissions []SubmissionWithResults `json:"submissions"`
-}
-
-// SubmissionWithResults contains submission and its results
-type SubmissionWithResults struct {
-	Submission db.Submission        `json:"submission"`
-	Results    []db.SubmissionResult `json:"results"`
-}
-
 func SubmitCode(c echo.Context) error {
 	var req dto.SubmissionRequest
 	if err := c.Bind(&req); err != nil {
@@ -166,7 +154,7 @@ func GetUserSubmissions(c echo.Context) error {
 		})
 	}
 
-	var submissionsWithResults []SubmissionWithResults
+	var submissionsWithResults []dto.SubmissionWithResults
 
 	for _, sub := range subs {
 		results, err := utils.Queries.GetSubmissionResultsBySubmissionID(c.Request().Context(), sub.ID)
@@ -176,13 +164,13 @@ func GetUserSubmissions(c echo.Context) error {
 			})
 		}
 
-		submissionsWithResults = append(submissionsWithResults, SubmissionWithResults{
+		submissionsWithResults = append(submissionsWithResults, dto.SubmissionWithResults{
 			Submission: sub,
 			Results:    results,
 		})
 	}
 
-	response := UserSubmissionsResponse{
+	response := dto.UserSubmissionsResponse{
 		User:        user,
 		Submissions: submissionsWithResults,
 	}
