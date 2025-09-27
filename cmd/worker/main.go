@@ -8,9 +8,8 @@ import (
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/helpers/validator"
 	logger "github.com/CodeChefVIT/cookoff-10.0-be/pkg/logging"
 	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/queue"
-	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/router"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/CodeChefVIT/cookoff-10.0-be/pkg/workers"
+	"github.com/hibiken/asynq"
 )
 
 func main() {
@@ -28,23 +27,9 @@ func main() {
 		redisURI = "localhost:6379"
 	}
 
-	_, taskClient := queue.InitQueue(redisURI, 2)
+	taskServer, _ := queue.InitQueue(redisURI, utils.Config.WorkerCount)
 
-	e := echo.New()
-
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:        true,
-		LogStatus:     true,
-		LogError:      true,
-		LogValuesFunc: logger.RouteLogger,
-	}))
-
-	router.RegisterRoute(e, taskClient)
-
-	for _, r := range e.Routes() {
-		fmt.Println(r.Method, r.Path)
-	}
-
-	logger.Infof("Starting HTTP server on port %s", utils.Config.Port)
-	e.Start(":" + utils.Config.Port)
+	mux := asynq.NewServeMux()
+	mux.HandleFunc("submission:process", workers.ProcessJudge0CallbackTask)
+	queue.StartQueueServer(taskServer, mux)
 }
