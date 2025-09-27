@@ -11,7 +11,7 @@ import (
 
 func RegisterRoute(e *echo.Echo, taskClient *asynq.Client) {
 	// Public routes (no auth)
-	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(50))))
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(rate.Limit(10))))
 
 	RegisterPublicRoutes(e, taskClient)
 
