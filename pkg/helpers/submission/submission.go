@@ -145,7 +145,7 @@ func CreateSubmission(ctx context.Context, question_id uuid.UUID, language_id in
 			LanguageID:     language_id,
 			Stdin:          B64(*testcase.Input),
 			ExpectedOutput: B64(testcase.ExpectedOutput),
-			Runtime:        runtime.Float64 * float64(runtime_mut),
+			Runtime:        runtime.Float64 / float64(runtime_mut),
 			Callback:       callback_url,
 		}
 	}
