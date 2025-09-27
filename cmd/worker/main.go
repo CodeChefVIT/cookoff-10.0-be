@@ -21,7 +21,6 @@ func main() {
 	validator.InitValidator()
 	utils.InitTimer()
 
-	// Initialize queue system
 	redisURI := fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), "6379")
 	if redisURI == ":" {
 		redisURI = "localhost:6379"

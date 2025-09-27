@@ -32,6 +32,17 @@ services:
       - postgres
       - redis
 
+  worker:
+    build: Dockerfile.worker
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+      - postgres
+      - redis
+
 volumes:
   postgres_data:
   redis_data:
