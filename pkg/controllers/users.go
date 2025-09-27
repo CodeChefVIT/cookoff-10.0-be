@@ -22,53 +22,49 @@ type User struct {
 }
 
 func GetAllUsers(c echo.Context) error {
-    limitParam := c.QueryParam("limit")
-    cursorParam := c.QueryParam("cursor")
+	limitParam := c.QueryParam("limit")
+	cursorParam := c.QueryParam("cursor")
 
-    limit := int32(10)
-    if limitParam != "" {
-        if l, err := strconv.Atoi(limitParam); err == nil && l > 0 {
-            limit = int32(l)
-        }
-    }
+	limit := int32(10)
+	if limitParam != "" {
+		if l, err := strconv.Atoi(limitParam); err == nil && l > 0 {
+			limit = int32(l)
+		}
+	}
 
-    var cursor *uuid.UUID
-    if cursorParam != "" {
-        if cur, err := uuid.Parse(cursorParam); err == nil {
-            cursor = &cur
-        } else {
-            return c.JSON(http.StatusBadRequest, echo.Map{
-                "status": "Invalid cursor",
-                "error":  err.Error(),
-            })
-        }
-    }
+	var cursor *uuid.UUID
+	if cursorParam != "" {
+		if cur, err := uuid.Parse(cursorParam); err == nil {
+			cursor = &cur
+		} else {
+			return c.JSON(http.StatusBadRequest, echo.Map{
+				"status": "Invalid cursor",
+				"error":  err.Error(),
+			})
+		}
+	}
 
-    params := db.GetUsersWithCursorParams{
-        Limit: limit,
-    }
-    if cursor != nil {
-        params.Column1 = *cursor
-    }
+	users, err := utils.Queries.GetUsersWithCursor(c.Request().Context(), db.GetUsersWithCursorParams{
+		Column1: *cursor,
+		Limit:   limit,
+	})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"status": "Could not get users",
+			"error":  err.Error(),
+		})
+	}
 
-    users, err := utils.Queries.GetUsersWithCursor(c.Request().Context(), params)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, echo.Map{
-            "status": "Could not get users",
-            "error":  err.Error(),
-        })
-    }
+	var nextCursor *uuid.UUID
+	if len(users) > 0 {
+		nextCursor = &users[len(users)-1].ID
+	}
 
-    var nextCursor *uuid.UUID
-    if len(users) > 0 {
-        nextCursor = &users[len(users)-1].ID
-    }
-
-    return c.JSON(http.StatusOK, echo.Map{
-        "status":      "success",
-        "users":       users,
-        "next_cursor": nextCursor,
-    })
+	return c.JSON(http.StatusOK, echo.Map{
+		"status":      "success",
+		"users":       users,
+		"next_cursor": nextCursor,
+	})
 }
 
 func BanUser(c echo.Context) error {
