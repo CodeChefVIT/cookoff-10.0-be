@@ -48,7 +48,6 @@ func main() {
     AllowCredentials: true, 
     MaxAge:           86400,
 }))
-
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI:        true,
 		LogStatus:     true,

@@ -25,10 +25,4 @@ func adminRoutes(api *echo.Group) {
 	admin.POST("/updateTime", controllers.UpdateTime)
 	admin.GET("/startRound", controllers.StartRound)
 	admin.GET("/resetRound", controllers.ResetRound)
-
-	// Submissions
-	admin.GET("/users/:id/submissions", controllers.GetUserSubmissions)
-
-	// Analytics
-	admin.GET("/analytics", controllers.GetAnalytics)
 }

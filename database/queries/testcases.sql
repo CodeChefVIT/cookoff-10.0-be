@@ -13,7 +13,7 @@ INSERT INTO testcases (
 RETURNING *;
 
 -- name: GetTestCase :one
-SELECT 
+SELECT
     id,
     expected_output,
     memory,
@@ -25,9 +25,8 @@ FROM testcases
 WHERE id = $1;
 
 -- name: GetTestCasesByQuestion :many
-SELECT 
+SELECT
     id,
-    expected_output,
     memory,
     input,
     hidden,
@@ -37,20 +36,19 @@ FROM testcases
 WHERE question_id = $1;
 
 -- name: GetPublicTestCasesByQuestion :many
-SELECT 
+SELECT
     id,
-    expected_output,
     memory,
     input,
     hidden,
     runtime,
     question_id
 FROM testcases
-WHERE question_id = $1 
+WHERE question_id = $1
 AND hidden = false;
 
 -- name: GetAllTestCases :many
-SELECT 
+SELECT
     id,
     expected_output,
     memory,
@@ -62,7 +60,7 @@ FROM testcases;
 
 -- name: UpdateTestCase :one
 UPDATE testcases
-SET 
+SET
     expected_output = $2,
     memory = $3,
     input = $4,
@@ -75,3 +73,15 @@ RETURNING *;
 -- name: DeleteTestCase :exec
 DELETE FROM testcases
 WHERE id = $1;
+
+-- name: GetAllTestCasesByQuestion :many
+SELECT
+    id,
+    memory,
+    expected_output,
+    input,
+    hidden,
+    runtime,
+    question_id
+FROM testcases
+WHERE question_id = $1;
