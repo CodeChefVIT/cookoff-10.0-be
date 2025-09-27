@@ -62,3 +62,7 @@ LIMIT $2;
 SELECT round_qualified
 FROM users
 WHERE id = $1;
+
+-- name: GetTotalUsersCount :one
+SELECT COUNT(*) 
+FROM users;

@@ -65,7 +65,7 @@ func RunCode(c echo.Context) error {
 		payload := submissions.Submission{
 			LanguageID:     req.LanguageID,
 			SourceCode:     submissions.B64(req.SourceCode),
-			Stdin:          submissions.B64(tc.Input),
+			Stdin:          submissions.B64(*tc.Input),
 			ExpectedOutput: submissions.B64(tc.ExpectedOutput),
 			Runtime:        finalRuntime,
 		}

@@ -15,6 +15,7 @@ INSERT INTO submissions (
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
 );
+
 -- name: UpdateSubmission :exec
 UPDATE submissions
 SET 
@@ -114,3 +115,60 @@ SELECT
     status
 FROM submission_results
 WHERE submission_id = $1;
+
+-- name: GetAllSubmissions :many
+SELECT
+    id,
+    question_id,
+    language_id,
+    source_code,
+    testcases_passed,
+    testcases_failed,
+    runtime,
+    memory,
+    status,
+    submission_time,
+    description,
+    user_id
+FROM submissions
+ORDER BY submission_time DESC;
+
+-- name: GetSubmissionsByUserID :many
+SELECT
+    id,
+    question_id,
+    language_id,
+    source_code,
+    testcases_passed,
+    testcases_failed,
+    runtime,
+    memory,
+    status,
+    submission_time,
+    description,
+    user_id
+FROM submissions
+WHERE user_id = $1
+ORDER BY submission_time DESC;
+
+-- name: GetTotalSubmissionsCount :one
+SELECT COUNT(*) 
+FROM submissions;
+
+-- name: GetRoundWiseQuestionSubmissions :many
+SELECT 
+    q.round AS round_id,
+    s.question_id,
+    COUNT(*) AS submissions_count
+FROM submissions s
+INNER JOIN questions q ON s.question_id = q.id
+GROUP BY q.round, s.question_id
+ORDER BY q.round, s.question_id;
+
+-- name: GetSubmissionsByLanguage :many
+SELECT 
+    language_id,
+    COUNT(*) AS submissions_count
+FROM submissions
+GROUP BY language_id
+ORDER BY submissions_count DESC;

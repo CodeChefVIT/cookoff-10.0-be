@@ -40,6 +40,15 @@ func main() {
 
 	e := echo.New()
 
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+    AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001"}, 
+    AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
+    AllowHeaders:     []string{echo.HeaderContentType, echo.HeaderAuthorization},
+    ExposeHeaders:    []string{"Content-Length"},
+    AllowCredentials: true, 
+    MaxAge:           86400,
+}))
+
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogURI:        true,
 		LogStatus:     true,
