@@ -340,15 +340,3 @@ func (q *Queries) UpgradeUserToRound(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, upgradeUserToRound, id)
 	return err
 }
-
-const getTotalUsers = `-- name: GetTotalUsers :one
-SELECT COUNT(*)::bigint
-FROM users
-`
-
-func (q *Queries) GetTotalUsersCount(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, getTotalUsers)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
