@@ -27,6 +27,7 @@ func main() {
 	}
 
 	taskServer, _ := queue.InitQueue(redisURI, utils.Config.WorkerCount)
+	defer taskServer.Shutdown()
 
 	mux := asynq.NewServeMux()
 	mux.HandleFunc("submission:process", workers.ProcessJudge0CallbackTask)

@@ -29,6 +29,7 @@ func main() {
 	}
 
 	_, taskClient := queue.InitQueue(redisURI, 2)
+	defer taskClient.Close()
 
 	e := echo.New()
 
