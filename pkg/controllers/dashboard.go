@@ -62,10 +62,14 @@ func LoadDashboard(c echo.Context) error {
 		_, ok := questionids[question.ID]
 		if !ok {
 			questionids[question.ID] = dto.RoundPoints{Round: int(question.Round), Points: 0}
-		} else {
-			var p = (int32)(question.Points) * (submission.TestcasesPassed.Int32) / (submission.TestcasesFailed.Int32 + submission.TestcasesPassed.Int32)
-			if questionids[question.ID].Points < p {
-				questionids[question.ID] = dto.RoundPoints{Round: int(question.Round), Points: p}
+		}
+		sub_result, err := utils.Queries.GetSubmissionResultsBySubmissionID(c.Request().Context(), submission.ID)
+
+		if err == nil {
+			for _, s := range sub_result {
+				if s.PointsAwarded > int32(questionids[question.ID].Points) {
+					questionids[question.ID] = dto.RoundPoints{Round: int(question.Round), Points: s.PointsAwarded}
+				}
 			}
 		}
 	}
