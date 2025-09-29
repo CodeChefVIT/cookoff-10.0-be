@@ -13,6 +13,7 @@ func RegisterPublicRoutes(e *echo.Echo, taskClient *asynq.Client) {
 		return controllers.CallbackUrl(c, taskClient)
 	})
 	e.GET("/docs", controllers.Docs)
+	e.GET("/getTime", controllers.GetTime)
 	e.POST("/signup", controllers.Signup)
 	e.POST("/login", controllers.Login)
 	e.POST("/refreshToken", controllers.RefreshToken)
