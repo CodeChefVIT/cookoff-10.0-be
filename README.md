@@ -16,6 +16,8 @@
 
 ## Tech Stack
 
+
+- [Echo](https://echo.labstack.com)
 - [Go](https://go.dev/)
 - [Docker](https://www.docker.com/)
 - [PostgreSQL](https://www.postgresql.org/)
@@ -107,9 +109,10 @@
    docker compose up --build -d
    ```
 
-2. Install SQLC
+2. Install SQLC & Goose
    ```sh
    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+   go install github.com/pressly/goose/v3/cmd/goose@latest
    ```
 
 3. Generate SQLC schema and queries
