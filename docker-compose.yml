@@ -21,8 +21,6 @@ services:
 
   api:
     build: .
-    ports:
-      - "127.0.0.1:8080:8080"
     volumes:
       - .:/app
     env_file:
@@ -33,9 +31,9 @@ services:
       - redis
 
   worker:
-    build: Dockerfile.worker
-    volumes:
-      - .:/app
+    build:
+          context: .
+          dockerfile: Dockerfile.worker
     env_file:
       - .env
     restart: on-failure

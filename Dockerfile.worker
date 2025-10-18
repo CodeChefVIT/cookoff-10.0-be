@@ -30,4 +30,4 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 
 # Run the worker
-CMD ["./worker"]
+CMD ["/app/worker"]
