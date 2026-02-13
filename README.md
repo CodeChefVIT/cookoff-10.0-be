@@ -152,8 +152,8 @@
     </td>
     <td>
       <p align="center">
-        <a href="https://github.com/equestrian2296">
-          <img src="https://avatars.githubusercontent.com/equestrian2296" width="170" height="170" style="border:2px solid grey; border-radius:50%;">
+        <a href="https://github.com/atharvaSharma17">
+          <img src="https://avatars.githubusercontent.com/atharvaSharma17" width="170" height="170" style="border:2px solid grey; border-radius:50%;">
         </a>
       </p>
       <p style="font-size:17px; font-weight:600;">Atharva Sharma</p>
