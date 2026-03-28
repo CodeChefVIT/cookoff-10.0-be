@@ -15,5 +15,4 @@ func RegisterAuthRoutes(api *echo.Group) {
 	api.GET("/dashboard", controllers.LoadDashboard)
 
 	//Timer
-	api.GET("/getTime", controllers.GetTime)
 }
